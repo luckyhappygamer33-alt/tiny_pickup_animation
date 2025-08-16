@@ -3,7 +3,7 @@
 	"id": "tiny_pickup_animation",
 	"version": "${version}",
 	"name": "Tiny Pickup Animation",
-	"description": "Tiny-tiny mod that slightly updates default Minecraft pickup animation in hotbar.",
+	"description": "Minecraft mod that improves default Minecraft item pickup animation (hotbar)",
 	"authors": [
 		"cat_metalhead"
 	],
