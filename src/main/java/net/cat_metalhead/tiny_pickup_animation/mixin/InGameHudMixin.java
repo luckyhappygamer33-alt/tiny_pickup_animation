@@ -18,24 +18,24 @@ public class InGameHudMixin {
     private void onRenderHotbarItem(DrawContext context, int x, int y, RenderTickCounter tickCounter, PlayerEntity player, ItemStack stack, int seed, CallbackInfo ci) {
 
         if (!stack.isEmpty()) {
-			float f = stack.getBobbingAnimationTime() - tickCounter.getTickDelta(false);
+			float f = (float)stack.getBobbingAnimationTime() - tickCounter.getTickProgress(false);
 			// System.out.println(f);
 			if (f > 0.0F) {
 				float progress = f / 5.0F;
 				float scale = 1.0F + 0.25F * (float)Math.sin(progress * Math.PI); // Fancy bounce scale
 
-				context.getMatrices().push();
-				context.getMatrices().translate((float)(x + 8), (float)(y + 12), 0.0F);
-				context.getMatrices().scale(scale*1.1F, scale*1.1F, 1.0F);
-				context.getMatrices().translate((float)(-(x + 8)), (float)(-(y + 12)), 0.0F);					
+				context.getMatrices().pushMatrix();
+				context.getMatrices().translate((float)(x + 8), (float)(y + 12));
+				context.getMatrices().scale(scale*1.1F, scale*1.1F);
+				context.getMatrices().translate((float)(-(x + 8)), (float)(-(y + 12)));					
 			}
 
 			context.drawItem(player, stack, x, y, seed);
 			if (f > 0.0F) {
-				context.getMatrices().pop();
+				context.getMatrices().popMatrix();
 			}
 
-			context.drawItemInSlot(MinecraftClient.getInstance().textRenderer, stack, x, y);
+			context.drawStackOverlay(MinecraftClient.getInstance().textRenderer, stack, x, y);
 
 			ci.cancel();
 		}
