@@ -8,16 +8,17 @@ import org.spongepowered.asm.mixin.injection.At;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 
 @Mixin(InGameHud.class)
 public class InGameHudMixin {
     @Inject(method = "renderHotbarItem", at = @At("HEAD"), cancellable = true)
-    private void onRenderHotbarItem(DrawContext context, int x, int y, float tickDelta, PlayerEntity player, ItemStack stack, int seed, CallbackInfo ci) {
+    private void onRenderHotbarItem(DrawContext context, int x, int y, RenderTickCounter tickCounter, PlayerEntity player, ItemStack stack, int seed, CallbackInfo ci) {
 
         if (!stack.isEmpty()) {
-			float f = stack.getBobbingAnimationTime() - tickDelta;
+			float f = stack.getBobbingAnimationTime() - tickCounter.getTickDelta(false);
 			// System.out.println(f);
 			if (f > 0.0F) {
 				float progress = f / 5.0F;

@@ -3,7 +3,7 @@
 	"id": "tiny_pickup_animation",
 	"version": "${version}",
 	"name": "Tiny Pickup Animation",
-	"description": "Minecraft mod that improves default Minecraft item pickup animation (hotbar)",
+	"description": "Tiny-tiny mod that slightly updates default Minecraft pickup animation in hotbar.",
 	"authors": [
 		"cat_metalhead"
 	],
@@ -27,7 +27,7 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.16.14",
-		"minecraft": "~1.20",
+		"minecraft": ">=1.21 <=1.21.5",
 		"java": ">=17",
 		"fabric-api": "*"
 	},
