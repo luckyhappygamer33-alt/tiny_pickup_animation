@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "tiny_pickup_animation",
+	"version": "${version}",
+	"name": "Tiny Pickup Animation",
+	"description": "Tiny-tiny mod that slightly updates default Minecraft pickup animation in hotbar.",
+	"authors": [
+		"cat_metalhead"
+	],
+	"contact": {
+		"homepage": "https://modrinth.com/project/tiny-pickup-animation"
+	},
+	"license": "MIT",
+	"icon": "assets/tiny_pickup_animation/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"main": [
+			"net.cat_metalhead.tiny_pickup_animation.TinyPickupAnimation"
+		],
+		"client": [
+		],
+		"fabric-datagen": [
+		]
+	},
+	"mixins": [
+		"tiny_pickup_animation.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.14",
+		"minecraft": "~1.20",
+		"java": ">=17",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
