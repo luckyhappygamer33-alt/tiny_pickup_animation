@@ -2,10 +2,12 @@
 	"required": true,
 	"package": "net.cat_metalhead.tiny_pickup_animation.mixin",
 	"compatibilityLevel": "JAVA_17",
-	"mixins": [
-	],
+	"mixins": [],
 	"client": [
-		"InGameHudMixin"
+		"InGameHudMixin",
+		"ClientPlayNetworkHandlerMixin",
+		"HandledScreenMixin",
+		"ItemEntityMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
