@@ -51,7 +51,7 @@ public class HandledScreenMixin {
                 // Draw the animated item
                 context.drawItem(stack, slot.x, slot.y);
                 context.getMatrices().pop();
-                context.drawItemInSlot(MinecraftClient.getInstance().textRenderer, stack, slot.x, slot.y);
+                context.drawStackOverlay(MinecraftClient.getInstance().textRenderer, stack, slot.x, slot.y);
 
                 // System.out.println("drawwing");
                 ci.cancel();
@@ -59,7 +59,7 @@ public class HandledScreenMixin {
 
                 // Animation finished - draw normally one last time
                 context.drawItem(stack, slot.x, slot.y);
-                context.drawItemInSlot(MinecraftClient.getInstance().textRenderer, stack, slot.x, slot.y);
+                context.drawStackOverlay(MinecraftClient.getInstance().textRenderer, stack, slot.x, slot.y);
 
                 PickupTracker.removeSlot(slot);
                 // PickupTracker.printSlotsToAnimate();
