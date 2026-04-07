@@ -19,7 +19,7 @@ public class InGameHudMixin {
 			PlayerEntity player, ItemStack stack, int seed, CallbackInfo ci) {
 
 		if (!stack.isEmpty()) {
-			float f = stack.getBobbingAnimationTime() - tickCounter.getTickDelta(false);
+			float f = stack.getBobbingAnimationTime() - tickCounter.getTickProgress(false);
 			// System.out.println(f);
 			if (f > 0.0F) {
 				float progress = f / 5.0F;

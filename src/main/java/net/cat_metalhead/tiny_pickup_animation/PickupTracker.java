@@ -33,7 +33,7 @@ public class PickupTracker {
         if (f == null)
             return 0.0F;
 
-        f -= MinecraftClient.getInstance().getRenderTickCounter().getLastFrameDuration();
+        f -= MinecraftClient.getInstance().getRenderTickCounter().getFixedDeltaTicks();
 
         if (f <= 0.0F) {
             return 0.0F;
