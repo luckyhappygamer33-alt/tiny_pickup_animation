@@ -22,49 +22,34 @@ public class HandledScreenMixin {
     protected ScreenHandler handler;
 
     @Inject(method = "drawSlot", at = @At("HEAD"), cancellable = true)
-    private void onDrawSlot(DrawContext context, Slot slot, CallbackInfo ci) {
+    private void onDrawSlot(DrawContext context, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
         ItemStack stack = slot.getStack();
 
+        int x = slot.x;
+        int y = slot.y;
+
         if (PickupTracker.getSlotsToAnimate().containsKey(slot)) {
-            // if (PickupTracker.getSlotsToAnimate().get(slot) > 0.0F) {
-            // stack.setBobbingAnimationTime(5);
-            // PickupTracker.getSlotsToAnimate().put(slot, false);
-            // }
-
             float f = PickupTracker.getBobbingAnimationTimeCustom(slot);
-
-            // System.out.println("f: " + f);
-            // System.out.println("bobbing time:" + stack.getBobbingAnimationTime());
 
             if (f > 0.0F) {
                 float progress = f / 5.0F;
                 float scale = 1.0F + 0.25F * (float) Math.sin(progress * Math.PI);
-
-                int x = slot.x;
-                int y = slot.y;
 
                 context.getMatrices().pushMatrix();
                 context.getMatrices().translate(x + 8, y + 8);
                 context.getMatrices().scale(scale * 1.1F, scale * 1.1F);
                 context.getMatrices().translate(-(x + 8), -(y + 8));
 
-                // Draw the animated item
-                context.drawItem(stack, slot.x, slot.y);
+                // Použi player verziu drawItem!
+                context.drawItem(stack, x, y);
                 context.getMatrices().popMatrix();
-                context.drawStackOverlay(MinecraftClient.getInstance().textRenderer, stack, slot.x, slot.y);
+                context.drawStackOverlay(MinecraftClient.getInstance().textRenderer, stack, x, y);
 
-                // System.out.println("drawwing");
                 ci.cancel();
             } else if (f <= 0.0F) {
-
-                // Animation finished - draw normally one last time
-                context.drawItem(stack, slot.x, slot.y);
-                context.drawStackOverlay(MinecraftClient.getInstance().textRenderer, stack, slot.x, slot.y);
-
+                context.drawItem(stack, x, y);
+                context.drawStackOverlay(MinecraftClient.getInstance().textRenderer, stack, x, y);
                 PickupTracker.removeSlot(slot);
-                // PickupTracker.printSlotsToAnimate();
-
-                // System.out.println("drawwing_end");
             }
         }
     }
