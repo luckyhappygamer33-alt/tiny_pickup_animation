@@ -2,9 +2,8 @@ package net.cat_metalhead.tiny_pickup_animation;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.screen.slot.Slot;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.inventory.Slot;
 
 public class PickupTracker {
     // private static final Map<Slot, Boolean> slotsToAnimate = new HashMap<>();
@@ -33,7 +32,7 @@ public class PickupTracker {
         if (f == null)
             return 0.0F;
 
-        f -= MinecraftClient.getInstance().getRenderTickCounter().getFixedDeltaTicks();
+        f -= Minecraft.getInstance().getDeltaTracker().getRealtimeDeltaTicks();
 
         if (f <= 0.0F) {
             return 0.0F;

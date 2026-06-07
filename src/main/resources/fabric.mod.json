@@ -24,9 +24,9 @@
 		"tiny_pickup_animation.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=0.17.3",
-		"minecraft": ">=1.21.11 <=1.21.11",
-		"java": ">=17",
+		"fabricloader": ">=0.18.4",
+		"minecraft": ">=26.1 <=26.1.2",
+		"java": ">=25",
 		"fabric-api": "*"
 	},
 	"suggests": {

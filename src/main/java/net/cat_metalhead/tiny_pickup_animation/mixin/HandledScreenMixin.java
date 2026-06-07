@@ -8,22 +8,22 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.At;
 
 import net.cat_metalhead.tiny_pickup_animation.PickupTracker;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
-@Mixin(HandledScreen.class)
+@Mixin(AbstractContainerScreen.class)
 public class HandledScreenMixin {
 
     @Shadow
-    protected ScreenHandler handler;
+    protected AbstractContainerMenu menu;
 
-    @Inject(method = "drawSlot", at = @At("HEAD"), cancellable = true)
-    private void onDrawSlot(DrawContext context, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
-        ItemStack stack = slot.getStack();
+    @Inject(method = "extractSlot", at = @At("HEAD"), cancellable = true)
+    private void onDrawSlot(GuiGraphicsExtractor context, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
+        ItemStack stack = slot.getItem();
 
         int x = slot.x;
         int y = slot.y;
@@ -35,20 +35,20 @@ public class HandledScreenMixin {
                 float progress = f / 5.0F;
                 float scale = 1.0F + 0.25F * (float) Math.sin(progress * Math.PI);
 
-                context.getMatrices().pushMatrix();
-                context.getMatrices().translate(x + 8, y + 8);
-                context.getMatrices().scale(scale * 1.1F, scale * 1.1F);
-                context.getMatrices().translate(-(x + 8), -(y + 8));
+                context.pose().pushMatrix();
+                context.pose().translate(x + 8, y + 8);
+                context.pose().scale(scale * 1.1F, scale * 1.1F);
+                context.pose().translate(-(x + 8), -(y + 8));
 
                 // Použi player verziu drawItem!
-                context.drawItem(stack, x, y);
-                context.getMatrices().popMatrix();
-                context.drawStackOverlay(MinecraftClient.getInstance().textRenderer, stack, x, y);
+                context.item(stack, x, y);
+                context.pose().popMatrix();
+                context.itemDecorations(Minecraft.getInstance().font, stack, x, y);
 
                 ci.cancel();
             } else if (f <= 0.0F) {
-                context.drawItem(stack, x, y);
-                context.drawStackOverlay(MinecraftClient.getInstance().textRenderer, stack, x, y);
+                context.item(stack, x, y);
+                context.itemDecorations(Minecraft.getInstance().font, stack, x, y);
                 PickupTracker.removeSlot(slot);
             }
         }

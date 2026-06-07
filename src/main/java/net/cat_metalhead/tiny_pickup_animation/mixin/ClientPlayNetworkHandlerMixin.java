@@ -6,58 +6,58 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.cat_metalhead.tiny_pickup_animation.PickupTracker;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
-@Mixin(ClientPlayNetworkHandler.class)
+@Mixin(ClientPacketListener.class)
 public class ClientPlayNetworkHandlerMixin {
     private ItemStack slotStackBefore = ItemStack.EMPTY;
 
-    @Inject(method = "onScreenHandlerSlotUpdate", at = @At("HEAD"))
-    private void onScreenHandlerSlotUpdateHead(ScreenHandlerSlotUpdateS2CPacket packet, CallbackInfo ci) {
-        MinecraftClient client = MinecraftClient.getInstance();
+    @Inject(method = "handleContainerSetSlot", at = @At("HEAD"))
+    private void onScreenHandlerSlotUpdateHead(ClientboundContainerSetSlotPacket packet, CallbackInfo ci) {
+        Minecraft client = Minecraft.getInstance();
         if (client == null || client.player == null)
             return;
-        if (!(client.currentScreen instanceof HandledScreen<?> screen))
+        if (!(client.screen instanceof AbstractContainerScreen<?> screen))
             return;
 
         // System.out.println("check1-head");
 
         int slotId = packet.getSlot();
-        ScreenHandler handler = screen.getScreenHandler();
+        AbstractContainerMenu handler = screen.getMenu();
         if (slotId < 0 || slotId >= handler.slots.size())
             return;
 
-        slotStackBefore = handler.slots.get(slotId).getStack().copy();
+        slotStackBefore = handler.slots.get(slotId).getItem().copy();
     }
 
-    @Inject(method = "onScreenHandlerSlotUpdate", at = @At("RETURN"))
-    private void onScreenHandlerSlotUpdateReturn(ScreenHandlerSlotUpdateS2CPacket packet, CallbackInfo ci) {
-        MinecraftClient client = MinecraftClient.getInstance();
+    @Inject(method = "handleContainerSetSlot", at = @At("RETURN"))
+    private void onScreenHandlerSlotUpdateReturn(ClientboundContainerSetSlotPacket packet, CallbackInfo ci) {
+        Minecraft client = Minecraft.getInstance();
         if (client == null || client.player == null)
             return;
-        if (!(client.currentScreen instanceof HandledScreen<?> screen))
+        if (!(client.screen instanceof AbstractContainerScreen<?> screen))
             return;
 
         // System.out.println("check1-return");
 
-        int syncId = packet.getSyncId();
+        int syncId = packet.getContainerId();
         int slotId = packet.getSlot();
 
-        if (syncId != client.player.playerScreenHandler.syncId)
+        if (syncId != client.player.inventoryMenu.containerId)
             return;
 
-        ScreenHandler handler = screen.getScreenHandler();
+        AbstractContainerMenu handler = screen.getMenu();
         if (slotId < 0 || slotId >= handler.slots.size())
             return;
 
         Slot slot = handler.slots.get(slotId);
-        ItemStack slotStackAfter = slot.getStack();
+        ItemStack slotStackAfter = slot.getItem();
 
         boolean wasEmpty = slotStackBefore.isEmpty() && !slotStackAfter.isEmpty();
         boolean countIncreased = !slotStackBefore.isEmpty() && !slotStackAfter.isEmpty()
