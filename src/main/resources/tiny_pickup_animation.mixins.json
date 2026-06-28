@@ -6,7 +6,9 @@
 	"client": [
 		"InGameHudMixin",
 		"ClientPlayNetworkHandlerMixin",
-		"HandledScreenMixin"
+		"HandledScreenMixin",
+		"MinecraftClientMixin",
+		"ClientPlayerInteractionManagerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
