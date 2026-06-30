@@ -36,18 +36,36 @@ public class PickupTracker {
         return new SlotKey(-1, slot);
     }
 
+    static SlotKey itemStateChangedSlotKey(int slot) {
+        return new SlotKey(-2, slot);
+    }
+
     public static void addSlot(int syncId, int slotId) {
+        if (!ModConfig.get().enabled)
+            return;
         slotsToAnimate.put(new SlotKey(syncId, slotId), 5.0F);
         // printPickedUpItems();
     }
 
     public static void addHotbarSlot(int slotId) {
+        if (!ModConfig.get().enabled)
+            return;
         slotsToAnimate.put(hotbarSlotKey(slotId), 5.0F);
     }
 
+    public static void addItemStateChangedSlot(int slotId) {
+        if (!ModConfig.get().enabled)
+            return;
+        slotsToAnimate.put(itemStateChangedSlotKey(slotId), 5.0F);
+    }
+
     public static void addSlotDelayed(int syncId, int slotId, float delaySeconds) {
+        if (!ModConfig.get().enabled)
+            return;
         pendingSlots.put(new SlotKey(syncId, slotId), delaySeconds);
     }
+
+    /// ===============///
 
     public static void tickPending() {
         float delta = MinecraftClient.getInstance().getLastFrameDuration();

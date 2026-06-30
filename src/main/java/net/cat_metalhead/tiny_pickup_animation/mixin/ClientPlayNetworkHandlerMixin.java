@@ -5,15 +5,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.llamalad7.mixinextras.lib.apache.commons.ObjectUtils.Null;
-
+import net.cat_metalhead.tiny_pickup_animation.ModConfig;
 import net.cat_metalhead.tiny_pickup_animation.PickupTracker;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.screen.AnvilScreenHandler;
@@ -121,66 +119,75 @@ public class ClientPlayNetworkHandlerMixin {
         // (36-44)
         // - Default block container: wasEmpty only — ignores hopper/dispenser top-ups
         if (isCartographyOutputSlot) {
-            System.out.println("cartography table case");
+            // System.out.println("cartography table case");
             // handled in drawSlot via frame comparison — suppress default case
         } else if (isEnchantingOutputSlot) {
-            System.out.println("enchanting table case");
-
+            // System.out.println("enchanting table case");
             boolean enchantingCompleted = !slotStackBefore.isEmpty() && !slotStackAfter.isEmpty()
                     && !ItemStack.areEqual(slotStackBefore, slotStackAfter);
-            if (enchantingCompleted) {
+            if (enchantingCompleted && ModConfig.get().enchantingTableAnimationEnabled) {
+
                 PickupTracker.addSlot(syncId, slotId);
             }
         } else if (isBrewingOutputSlot) {
-            System.out.println("brewing stand case");
-
+            // System.out.println("brewing stand case");
             boolean brewingCompleted = !slotStackBefore.isEmpty() && !slotStackAfter.isEmpty()
                     && !ItemStack.areEqual(slotStackBefore, slotStackAfter);
-            if (brewingCompleted) {
-                float delay = slotId * 2F;
+            if (brewingCompleted && ModConfig.get().brewingStandAnimationEnabled) {
+
+                float delay = slotId * ModConfig.get().brewingStandCascadeDelay;
                 PickupTracker.addSlotDelayed(syncId, slotId, delay);
             }
         } else if (slot instanceof CraftingResultSlot) {
-            System.out.println("crafting table case");
 
-            if (wasEmpty || itemChanged) {
-                boolean newScreen = syncId != lastCraftingSyncId;
+            if (ModConfig.get().craftingAnimationEnabled) {
+                // System.out.println("crafting table case");
+                if (wasEmpty || itemChanged) {
 
-                System.out
-                        .println("lastCraftingOutputItem current value = " + PickupTracker.getLastCraftingOutputItem());
-                System.out.println("slotStackAfter item = " + slotStackAfter.getItem());
-                boolean newRecipe = slotStackAfter.getItem() != PickupTracker.getLastCraftingOutputItem();
-                System.out.println("newScreen " + newScreen);
-                System.out.println("newRecipe " + newRecipe);
+                    boolean newScreen = syncId != lastCraftingSyncId;
 
-                if (newScreen || newRecipe) {
-                    PickupTracker.addSlot(syncId, slotId);
+                    // System.out
+                    // .println("lastCraftingOutputItem current value = " +
+                    // PickupTracker.getLastCraftingOutputItem());
+                    // System.out.println("slotStackAfter item = " + slotStackAfter.getItem());
+                    boolean newRecipe = slotStackAfter.getItem() != PickupTracker.getLastCraftingOutputItem();
+                    // System.out.println("newScreen " + newScreen);
+                    // System.out.println("newRecipe " + newRecipe);
+
+                    if (newScreen || newRecipe) {
+                        PickupTracker.addSlot(syncId, slotId);
+                    }
+                    lastCraftingSyncId = syncId;
+                    // System.out.println("lastCraftingOutputItem set to " +
+                    // slotStackAfter.getItem().getName());
+                    PickupTracker.setLastCraftingOutputItem(slotStackAfter.getItem());
                 }
-                lastCraftingSyncId = syncId;
-                System.out.println("lastCraftingOutputItem set to " + slotStackAfter.getItem().getName());
-                PickupTracker.setLastCraftingOutputItem(slotStackAfter.getItem());
             }
         } else if (slot instanceof FurnaceOutputSlot) {
-            System.out.println("furnace case");
-            if (wasEmpty) {
+            // System.out.println("furnace case");
+            if (wasEmpty && ModConfig.get().furnaceAnimationEnabled) {
+
                 PickupTracker.addSlot(syncId, slotId);
             }
         } else if (wasEmpty || countIncreased) {
             if (slot.inventory instanceof PlayerInventory) {
-                System.out.println("default case");
+                // System.out.println("default case");
 
                 // player inventory slot — full animation logic
-                if (!PickupTracker.isSuppressInventoryAnimation()) {
+                if (!PickupTracker.isSuppressInventoryAnimation() && ModConfig.get().inventoryAnimationEnabled) {
                     PickupTracker.addSlot(syncId, slotId);
-                    if (slotId >= 36 && slotId <= 44) {
-                        PickupTracker.addHotbarSlot(slotId - 36);
-                    }
+                    // if (slotId >= 36 && slotId <= 44) { //PROBABLY REDUNDANT
+                    // System.out.println("villager said huh");
+                    // PickupTracker.addHotbarSlot(slotId - 36);
+                    // } //PROBABLY REDUNDANT
                 }
             } else if (wasEmpty) {
-                System.out.println("block container case");
+                // System.out.println("block container case");
 
-                // block container slot — only animate on empty→filled
-                PickupTracker.addSlot(syncId, slotId);
+                // block container slot — only animate on empty-->filled
+                if (ModConfig.get().containersAnimationEnabled) {
+                    PickupTracker.addSlot(syncId, slotId);
+                }
             }
         }
     }

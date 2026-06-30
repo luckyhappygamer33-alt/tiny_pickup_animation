@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import org.spongepowered.asm.mixin.injection.At;
 
+import net.cat_metalhead.tiny_pickup_animation.ModConfig;
 import net.cat_metalhead.tiny_pickup_animation.PickupTracker;
 import net.cat_metalhead.tiny_pickup_animation.SlotKey;
 import net.minecraft.client.MinecraftClient;
@@ -76,8 +77,8 @@ public class HandledScreenMixin {
         if (handler instanceof AnvilScreenHandler) {
             Slot outputSlot = handler.slots.get(2);
             boolean isEmpty = outputSlot.getStack().isEmpty();
-            if (anvilOutputWasEmpty && !isEmpty) {
-                System.out.println("anvil case (client side)");
+            if (anvilOutputWasEmpty && !isEmpty && ModConfig.get().anvilAnimationEnabled) {
+                // System.out.println("anvil case (client side)");
 
                 PickupTracker.addSlot(handler.syncId, 2);
             }
@@ -85,17 +86,19 @@ public class HandledScreenMixin {
         } else if (handler instanceof CartographyTableScreenHandler) {
             Slot outputSlot = handler.slots.get(2);
             ItemStack current = outputSlot.getStack();
-            if (!current.isEmpty() && !ItemStack.areEqual(current, lastCartographyOutput)) {
-                System.out.println("cartography table case (client side)");
+            if (!current.isEmpty() && !ItemStack.areEqual(current, lastCartographyOutput) && ModConfig
+                    .get().cartographyTableAnimationEnabled) {
+                // System.out.println("cartography table case (client side)");
 
                 PickupTracker.addSlot(handler.syncId, 2);
             }
             lastCartographyOutput = current.copy();
         } else if (handler instanceof GrindstoneScreenHandler) {
+
             Slot outputSlot = handler.slots.get(2);
             boolean isEmpty = outputSlot.getStack().isEmpty();
-            if (grindstoneOutputWasEmpty && !isEmpty) {
-                System.out.println("grindstone case (client side)");
+            if (grindstoneOutputWasEmpty && !isEmpty && ModConfig.get().grindstoneAnimationEnabled) {
+                // System.out.println("grindstone case (client side)");
 
                 PickupTracker.addSlot(handler.syncId, 2);
             }
@@ -103,8 +106,8 @@ public class HandledScreenMixin {
         } else if (handler instanceof LoomScreenHandler) {
             Slot outputSlot = handler.slots.get(3);
             boolean isEmpty = outputSlot.getStack().isEmpty();
-            if (loomOutputWasEmpty && !isEmpty) {
-                System.out.println("loom case (client side)");
+            if (loomOutputWasEmpty && !isEmpty && ModConfig.get().loomAnimationEnabled) {
+                // System.out.println("loom case (client side)");
 
                 PickupTracker.addSlot(handler.syncId, 3);
             }
@@ -112,8 +115,8 @@ public class HandledScreenMixin {
         } else if (handler instanceof SmithingScreenHandler) {
             Slot outputSlot = handler.slots.get(3);
             boolean isEmpty = outputSlot.getStack().isEmpty();
-            if (smithingOutputWasEmpty && !isEmpty) {
-                System.out.println("smithing table case (client side)");
+            if (smithingOutputWasEmpty && !isEmpty && ModConfig.get().smithingTableAnimationEnabled) {
+                // System.out.println("smithing table case (client side)");
 
                 PickupTracker.addSlot(handler.syncId, 3);
             }
@@ -121,8 +124,8 @@ public class HandledScreenMixin {
         } else if (handler instanceof StonecutterScreenHandler) {
             Slot outputSlot = handler.slots.get(1);
             boolean isEmpty = outputSlot.getStack().isEmpty();
-            if (stonecutterOutputWasEmpty && !isEmpty) {
-                System.out.println("stonecutter case (client side)");
+            if (stonecutterOutputWasEmpty && !isEmpty && ModConfig.get().stonecutterAnimationEnabled) {
+                // System.out.println("stonecutter case (client side)");
 
                 PickupTracker.addSlot(handler.syncId, 1);
             }
@@ -138,7 +141,8 @@ public class HandledScreenMixin {
         // the timer to 5.0F on every frame while the animation is already running.
         if (MinecraftClient.getInstance().currentScreen instanceof CreativeInventoryScreen
                 && slot.inventory instanceof PlayerInventory && slot.getIndex() < 9) {
-            if (stack.getBobbingAnimationTime() > 0 && !PickupTracker.getSlotsToAnimate().containsKey(key)) {
+            if (stack.getBobbingAnimationTime() > 0 && !PickupTracker.getSlotsToAnimate().containsKey(key)
+                    && ModConfig.get().inventoryAnimationEnabled) {
                 PickupTracker.addSlot(handler.syncId, handler.slots.indexOf(slot));
             }
         }
@@ -148,7 +152,7 @@ public class HandledScreenMixin {
 
             if (f > 0.0F) {
                 float progress = f / 5.0F;
-                float scale = 1.0F + 0.25F * (float) Math.sin(progress * Math.PI);
+                float scale = 1.0F + 0.25F * (float) Math.sin(progress * Math.PI); // 0.25F is bounce scale
 
                 int x = slot.x;
                 int y = slot.y;
@@ -194,7 +198,7 @@ public class HandledScreenMixin {
                     .findFirst().orElse(null);
             if (outputSlot != null && outputSlot.getStack().isEmpty()) {
                 PickupTracker.resetLastCraftingOutputItem();
-                System.out.println("lastCraftingOutputItem reset to null");
+                // System.out.println("lastCraftingOutputItem reset to null");
             }
 
         }

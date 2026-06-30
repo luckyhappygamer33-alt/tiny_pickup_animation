@@ -5,8 +5,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.At;
 
+import net.cat_metalhead.tiny_pickup_animation.ModConfig;
 import net.cat_metalhead.tiny_pickup_animation.PickupTracker;
 import net.cat_metalhead.tiny_pickup_animation.SlotKey;
+import net.cat_metalhead.tiny_pickup_animation.ModConfig.AnimationMode;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
@@ -23,6 +25,13 @@ public class InGameHudMixin {
 	private void onRenderHotbarItem(DrawContext context, int x, int y, float tickDelta, PlayerEntity player,
 			ItemStack stack, int seed, CallbackInfo ci) {
 
+		if (!ModConfig.get().enabled)
+			return;
+
+		AnimationMode hotbarMode = ModConfig.get().hotbarAnimationMode;
+		AnimationMode pickBlockMode = ModConfig.get().pickBlockAnimationMode;
+		AnimationMode itemStateChangedMode = ModConfig.get().itemStateChangedAnimationMode;
+
 		//// item changed state like fill bucket into water bucket, fill bottles into
 		//// water bottles
 		int slotIndex = seed - 1;
@@ -32,7 +41,7 @@ public class InGameHudMixin {
 		if (currentItem != lastItem) {
 			if (currentItem != null && lastItem != null) {
 				// item type changed — animate
-				PickupTracker.addHotbarSlot(slotIndex);
+				PickupTracker.addItemStateChangedSlot(slotIndex);
 			}
 			lastHotbarItems[slotIndex] = currentItem;
 		}
@@ -40,30 +49,87 @@ public class InGameHudMixin {
 
 		if (!stack.isEmpty()) {
 			float f = stack.getBobbingAnimationTime() - tickDelta;
+			boolean isPickBlock = false;
+			boolean isItemStateChanged = false;
 
-			if (f <= 0.0F) {
+			if (f <= 0.0F) { // pick-block!!!
 				// Vanilla isn't animating — check our custom tracker (e.g. pick-block)
 				SlotKey key = new SlotKey(-1, seed - 1);
-				f = PickupTracker.getBobbingAnimationTimeCustom(key) - tickDelta;
-			}
-			if (f > 0.0F) {
-				float progress = f / 5.0F;
-				float scale = 1.0F + 0.25F * (float) Math.sin(progress * Math.PI); // Fancy bounce scale
+				float customF = PickupTracker.getBobbingAnimationTimeCustom(key) - tickDelta;
+				if (customF > 0.0F) {
+					f = customF;
+					isPickBlock = true;
+				}
 
-				context.getMatrices().push();
-				context.getMatrices().translate((float) (x + 8), (float) (y + 12), 0.0F);
-				context.getMatrices().scale(scale * 1.1F, scale * 1.1F, 1.0F);
-				context.getMatrices().translate((float) (-(x + 8)), (float) (-(y + 12)), 0.0F);
+				SlotKey itemStateKey = new SlotKey(-2, seed - 1);
+				float itemStateF = PickupTracker.getBobbingAnimationTimeCustom(itemStateKey) - tickDelta;
+				if (itemStateF > 0.0F) {
+					f = itemStateF;
+					isItemStateChanged = true;
+				}
 			}
 
+			AnimationMode mode = hotbarMode;
+			if (isPickBlock) {
+				mode = pickBlockMode;
+			} else if (isItemStateChanged) {
+				mode = itemStateChangedMode;
+				System.out.println("isItemStateChanged: " + isItemStateChanged);
+				System.out.println("mode: " + mode);
+			}
+
+			// AnimationMode mode = isPickBlock ? pickBlockMode : hotbarMode;
+
+			if (mode == AnimationMode.VANILLA) { // VANILLA MODE
+				// let vanilla handle everything
+				if (!isPickBlock && !isItemStateChanged)
+					return;
+
+				if (f > 0.0F) {
+					float h = 1.0F + f / 5.0F;
+					context.getMatrices().push();
+					context.getMatrices().translate((float) (x + 8), (float) (y + 12), 0.0F);
+					context.getMatrices().scale(1.0F / h, (h + 1.0F) / 2.0F, 1.0F);
+					context.getMatrices().translate((float) (-(x + 8)), (float) (-(y + 12)), 0.0F);
+				}
+
+				context.drawItem(player, stack, x, y, seed);
+				if (f > 0.0F) {
+					context.getMatrices().pop();
+				}
+
+				context.drawItemInSlot(MinecraftClient.getInstance().textRenderer, stack, x, y);
+
+				ci.cancel();
+				return;
+			} else if (mode == AnimationMode.CUSTOM) { // CUSTOM (MOD) MODE
+				// draw item but suppress all animation
+				if (f > 0.0F) {
+					float progress = f / 5.0F;
+					float scale = 1.0F + 0.25F * (float) Math.sin(progress * Math.PI); // 0.25F is bounce scale
+
+					context.getMatrices().push();
+					context.getMatrices().translate((float) (x + 8), (float) (y + 12), 0.0F);
+					context.getMatrices().scale(scale * 1.1F, scale * 1.1F, 1.0F);
+					context.getMatrices().translate((float) (-(x + 8)), (float) (-(y + 12)), 0.0F);
+				}
+
+				context.drawItem(player, stack, x, y, seed);
+				if (f > 0.0F) {
+					context.getMatrices().pop();
+				}
+
+				context.drawItemInSlot(MinecraftClient.getInstance().textRenderer, stack, x, y);
+
+				ci.cancel();
+				return;
+			}
+
+			// DISABLED MODE
 			context.drawItem(player, stack, x, y, seed);
-			if (f > 0.0F) {
-				context.getMatrices().pop();
-			}
-
 			context.drawItemInSlot(MinecraftClient.getInstance().textRenderer, stack, x, y);
-
 			ci.cancel();
+
 		}
 	}
 }
