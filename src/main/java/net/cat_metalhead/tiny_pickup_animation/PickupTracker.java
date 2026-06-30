@@ -40,23 +40,33 @@ public class PickupTracker {
         return new SlotKey(-2, slot);
     }
 
+    static SlotKey groundPickupSlotKey(int slot) {
+        return new SlotKey(-3, slot);
+    }
+
     public static void addSlot(int syncId, int slotId) {
         if (!ModConfig.get().enabled)
             return;
-        slotsToAnimate.put(new SlotKey(syncId, slotId), 5.0F);
+        slotsToAnimate.put(new SlotKey(syncId, slotId), ModConfig.get().animationDuration);
         // printPickedUpItems();
     }
 
     public static void addHotbarSlot(int slotId) {
         if (!ModConfig.get().enabled)
             return;
-        slotsToAnimate.put(hotbarSlotKey(slotId), 5.0F);
+        slotsToAnimate.put(hotbarSlotKey(slotId), ModConfig.get().animationDuration);
     }
 
     public static void addItemStateChangedSlot(int slotId) {
         if (!ModConfig.get().enabled)
             return;
-        slotsToAnimate.put(itemStateChangedSlotKey(slotId), 5.0F);
+        slotsToAnimate.put(groundPickupSlotKey(slotId), ModConfig.get().animationDuration);
+    }
+
+    public static void addGroundPickupSlot(int slotId) {
+        if (!ModConfig.get().enabled)
+            return;
+        slotsToAnimate.put(itemStateChangedSlotKey(slotId), ModConfig.get().animationDuration);
     }
 
     public static void addSlotDelayed(int syncId, int slotId, float delaySeconds) {
@@ -74,7 +84,7 @@ public class PickupTracker {
             Map.Entry<SlotKey, Float> entry = it.next();
             float remaining = entry.getValue() - delta;
             if (remaining <= 0) {
-                slotsToAnimate.put(entry.getKey(), 5.0F);
+                slotsToAnimate.put(entry.getKey(), ModConfig.get().animationDuration);
                 it.remove();
             } else {
                 entry.setValue(remaining);

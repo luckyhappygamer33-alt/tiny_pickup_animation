@@ -3,8 +3,9 @@ package net.cat_metalhead.tiny_pickup_animation;
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import dev.isxander.yacl3.config.v2.api.autogen.AutoGen;
+import dev.isxander.yacl3.config.v2.api.autogen.FloatSlider;
+import dev.isxander.yacl3.config.v2.api.autogen.IntSlider;
 import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
-import net.cat_metalhead.tiny_pickup_animation.ModConfig.AnimationMode;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
 
@@ -68,7 +69,8 @@ public class ModConfig {
         public boolean brewingStandAnimationEnabled = true;
         @SerialEntry
         @AutoGen(category = "workstations")
-        @dev.isxander.yacl3.config.v2.api.autogen.IntField(min = 0, max = 200)
+        // @dev.isxander.yacl3.config.v2.api.autogen.IntField(min = 0, max = 200)
+        @IntSlider(min = 0, max = 100, step = 1)
         public int brewingStandCascadeDelay = 2;
         @SerialEntry
         @AutoGen(category = "workstations")
@@ -98,6 +100,16 @@ public class ModConfig {
         @AutoGen(category = "workstations")
         @dev.isxander.yacl3.config.v2.api.autogen.Boolean
         public boolean cartographyTableAnimationEnabled = true;
+
+        @SerialEntry
+        @AutoGen(category = "animation")
+        @FloatSlider(min = 0.0f, max = 2.0f, step = 0.05f, format = "%.2f")
+        public float bounceScale = 0.25f; // replaces hardcoded 0.25F addition
+
+        @SerialEntry
+        @AutoGen(category = "animation")
+        @FloatSlider(min = 0.5f, max = 20.0f, step = 0.5f)
+        public float animationDuration = 5.0f; // replaces hardcoded 5.0F
 
         public static ModConfig get() {
                 return HANDLER.instance();

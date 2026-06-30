@@ -151,8 +151,9 @@ public class HandledScreenMixin {
             float f = PickupTracker.getBobbingAnimationTimeCustom(key) - lastTickDelta;
 
             if (f > 0.0F) {
-                float progress = f / 5.0F;
-                float scale = 1.0F + 0.25F * (float) Math.sin(progress * Math.PI); // 0.25F is bounce scale
+                float progress = f / ModConfig.get().animationDuration;
+                float scale = 1.0F + ModConfig.get().bounceScale * (float) Math.sin(progress * Math.PI); // 0.25F is
+                                                                                                         // bounce scale
 
                 int x = slot.x;
                 int y = slot.y;

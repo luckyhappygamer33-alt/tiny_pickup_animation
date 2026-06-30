@@ -22,5 +22,8 @@
     "yacl3.config.tiny_pickup_animation:config.smithingTableAnimationEnabled": "Smithing Table",
     "yacl3.config.tiny_pickup_animation:config.stonecutterAnimationEnabled": "Stonecutter",
     "yacl3.config.tiny_pickup_animation:config.loomAnimationEnabled": "Loom",
-    "yacl3.config.tiny_pickup_animation:config.cartographyTableAnimationEnabled": "Cartography Table"
+    "yacl3.config.tiny_pickup_animation:config.cartographyTableAnimationEnabled": "Cartography Table",
+    "yacl3.config.tiny_pickup_animation:config.category.animation": "Animation",
+    "yacl3.config.tiny_pickup_animation:config.bounceScale": "Animation Bounce Scale",
+    "yacl3.config.tiny_pickup_animation:config.animationDuration": "Animation Duration"
 }

@@ -20,6 +20,7 @@ import net.minecraft.item.ItemStack;
 public class InGameHudMixin {
 
 	private final Item[] lastHotbarItems = new Item[9];
+	private final boolean[] wasGroundPickupActive = new boolean[9];
 
 	@Inject(method = "renderHotbarItem", at = @At("HEAD"), cancellable = true)
 	private void onRenderHotbarItem(DrawContext context, int x, int y, float tickDelta, PlayerEntity player,
@@ -46,9 +47,20 @@ public class InGameHudMixin {
 			lastHotbarItems[slotIndex] = currentItem;
 		}
 		////
+		///
+
+		boolean vanillaAnimating = stack.getBobbingAnimationTime() > 0;
+		if (vanillaAnimating && !wasGroundPickupActive[slotIndex]) {
+			// Ground pickup just started — register our own timer instead of using
+			// vanilla's
+			PickupTracker.addGroundPickupSlot(slotIndex); // new method, new key e.g. SlotKey(-3, slot)
+		}
+		wasGroundPickupActive[slotIndex] = vanillaAnimating;
 
 		if (!stack.isEmpty()) {
-			float f = stack.getBobbingAnimationTime() - tickDelta;
+			SlotKey groundKey = new SlotKey(-3, slotIndex);
+			float f = PickupTracker.getBobbingAnimationTimeCustom(groundKey) - tickDelta;
+			// float f = stack.getBobbingAnimationTime() - tickDelta;
 			boolean isPickBlock = false;
 			boolean isItemStateChanged = false;
 
@@ -105,8 +117,10 @@ public class InGameHudMixin {
 			} else if (mode == AnimationMode.CUSTOM) { // CUSTOM (MOD) MODE
 				// draw item but suppress all animation
 				if (f > 0.0F) {
-					float progress = f / 5.0F;
-					float scale = 1.0F + 0.25F * (float) Math.sin(progress * Math.PI); // 0.25F is bounce scale
+					float progress = f / ModConfig.get().animationDuration;
+					float scale = 1.0F + ModConfig.get().bounceScale * (float) Math.sin(progress * Math.PI); // 0.25F is
+																												// bounce
+																												// scale
 
 					context.getMatrices().push();
 					context.getMatrices().translate((float) (x + 8), (float) (y + 12), 0.0F);
