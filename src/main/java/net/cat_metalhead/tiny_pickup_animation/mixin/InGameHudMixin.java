@@ -19,8 +19,8 @@ import net.minecraft.item.ItemStack;
 @Mixin(InGameHud.class)
 public class InGameHudMixin {
 
-	private final Item[] lastHotbarItems = new Item[9];
-	private final boolean[] wasGroundPickupActive = new boolean[9];
+	private final Item[] lastHotbarItems = new Item[10];
+	private final boolean[] wasGroundPickupActive = new boolean[10];
 
 	@Inject(method = "renderHotbarItem", at = @At("HEAD"), cancellable = true)
 	private void onRenderHotbarItem(DrawContext context, int x, int y, float tickDelta, PlayerEntity player,
@@ -36,6 +36,11 @@ public class InGameHudMixin {
 		//// item changed state like fill bucket into water bucket, fill bottles into
 		//// water bottles
 		int slotIndex = seed - 1;
+		// System.out.println("slotIndex: " + slotIndex);
+		if (slotIndex < 0 || slotIndex > 9) {
+			return; // not a regular hotbar slot — skip our logic entirely
+		}
+
 		Item currentItem = stack.isEmpty() ? null : stack.getItem();
 		Item lastItem = lastHotbarItems[slotIndex];
 
@@ -64,7 +69,8 @@ public class InGameHudMixin {
 			boolean isPickBlock = false;
 			boolean isItemStateChanged = false;
 
-			if (f <= 0.0F) { // pick-block!!!
+			if (f <= 0.0F) {
+				// pick-block!!!
 				// Vanilla isn't animating — check our custom tracker (e.g. pick-block)
 				SlotKey key = new SlotKey(-1, seed - 1);
 				float customF = PickupTracker.getBobbingAnimationTimeCustom(key) - tickDelta;
@@ -86,8 +92,6 @@ public class InGameHudMixin {
 				mode = pickBlockMode;
 			} else if (isItemStateChanged) {
 				mode = itemStateChangedMode;
-				System.out.println("isItemStateChanged: " + isItemStateChanged);
-				System.out.println("mode: " + mode);
 			}
 
 			// AnimationMode mode = isPickBlock ? pickBlockMode : hotbarMode;

@@ -60,13 +60,13 @@ public class PickupTracker {
     public static void addItemStateChangedSlot(int slotId) {
         if (!ModConfig.get().enabled)
             return;
-        slotsToAnimate.put(groundPickupSlotKey(slotId), ModConfig.get().animationDuration);
+        slotsToAnimate.put(itemStateChangedSlotKey(slotId), ModConfig.get().animationDuration);
     }
 
     public static void addGroundPickupSlot(int slotId) {
         if (!ModConfig.get().enabled)
             return;
-        slotsToAnimate.put(itemStateChangedSlotKey(slotId), ModConfig.get().animationDuration);
+        slotsToAnimate.put(groundPickupSlotKey(slotId), ModConfig.get().animationDuration);
     }
 
     public static void addSlotDelayed(int syncId, int slotId, float delaySeconds) {
