@@ -104,12 +104,12 @@ public class ModConfig {
         @SerialEntry
         @AutoGen(category = "animation")
         @FloatSlider(min = 0.0f, max = 2.0f, step = 0.05f, format = "%.2f")
-        public float bounceScale = 0.25f; // replaces hardcoded 0.25F addition
+        public float bounceScale = 0.50f; // replaces hardcoded 0.25F addition
 
         @SerialEntry
         @AutoGen(category = "animation")
         @FloatSlider(min = 0.5f, max = 20.0f, step = 0.5f)
-        public float animationDuration = 5.0f; // replaces hardcoded 5.0F
+        public float animationDuration = 6.0f; // replaces hardcoded 5.0F
 
         public static ModConfig get() {
                 return HANDLER.instance();

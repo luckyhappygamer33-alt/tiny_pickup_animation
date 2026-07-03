@@ -174,13 +174,16 @@ public class InGameHudMixin {
 				// draw item but suppress all animation
 				if (f > 0.0F) {
 					float progress = f / ModConfig.get().animationDuration;
-					float scale = 1.0F + ModConfig.get().bounceScale * (float) Math.sin(progress * Math.PI); // 0.25F is
-																												// bounce
-																												// scale
+					// float scale = 1.0F + ModConfig.get().bounceScale * (float) Math.sin(progress
+					// * Math.PI); // 0.25F is
+					// bounce
+					// scale
+
+					float scale = 1.0F + ModConfig.get().bounceScale * (float) Math.pow(progress, 2.0F);
 
 					context.getMatrices().push();
 					context.getMatrices().translate((float) (x + 8), (float) (y + 8), 0.0F);
-					context.getMatrices().scale(scale * 1.1F, scale * 1.1F, 1.0F);
+					context.getMatrices().scale(scale, scale, 1.0F);
 					context.getMatrices().translate((float) (-(x + 8)), (float) (-(y + 8)), 0.0F);
 				}
 
