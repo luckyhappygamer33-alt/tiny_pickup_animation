@@ -21,6 +21,11 @@ public class InGameHudMixin {
 
 	private final Item[] lastHotbarItems = new Item[10];
 	private final boolean[] wasGroundPickupActive = new boolean[10];
+	private final Item[] itemJustLeft = new Item[10];
+	private final boolean[] pendingItemStateChanged = new boolean[10];
+	private final Item[] prevFrameItems = new Item[10];
+	private final Item[] currentFrameItems = new Item[10];
+	private boolean tmp = false;
 
 	@Inject(method = "renderHotbarItem", at = @At("HEAD"), cancellable = true)
 	private void onRenderHotbarItem(DrawContext context, int x, int y, float tickDelta, PlayerEntity player,
@@ -41,18 +46,39 @@ public class InGameHudMixin {
 			return; // not a regular hotbar slot — skip our logic entirely
 		}
 
-		Item currentItem = stack.isEmpty() ? null : stack.getItem();
-		Item lastItem = lastHotbarItems[slotIndex];
+		Item prev = prevFrameItems[slotIndex];
+		Item curr = currentFrameItems[slotIndex];
 
-		if (currentItem != lastItem) {
-			if (currentItem != null && lastItem != null) {
-				// item type changed — animate
+		if (curr != prev && curr != null && prev != null) {
+
+			System.out.println("RENDER slotIndex=" + slotIndex + " seed=" + seed + " item="
+					+ (stack.isEmpty() ? "null" : stack.getItem()));
+			// check if curr appears as prev in any other slot --> swap
+			boolean isSwap = false;
+			System.out.println("CHANGE slot=" + slotIndex
+					+ " prev=" + prev
+					+ " curr=" + curr);
+			for (int i = 0; i < 10; i++) {
+				if (i != slotIndex
+						&& prevFrameItems[i] == curr
+						&& currentFrameItems[i] != prevFrameItems[i]) { // other slot also changed
+					isSwap = true;
+					tmp = true;
+					System.out.println("  SWAP MATCH found at slot=" + i
+							+ " prevFrameItems[i]=" + prevFrameItems[i]
+							+ " currentFrameItems[i]=" + currentFrameItems[i]);
+					break;
+				}
+			}
+			if (isSwap) {
+				PickupTracker.addGroundPickupSlot(slotIndex);
+			}
+			if (!isSwap) {
 				PickupTracker.addItemStateChangedSlot(slotIndex);
 			}
-			lastHotbarItems[slotIndex] = currentItem;
+			System.out.println("  isSwap=" + isSwap);
+			System.out.println("  registered as: " + (isSwap ? "groundPickup" : "itemStateChanged"));
 		}
-		////
-		///
 
 		boolean vanillaAnimating = stack.getBobbingAnimationTime() > 0;
 		if (vanillaAnimating && !wasGroundPickupActive[slotIndex]) {
@@ -65,11 +91,18 @@ public class InGameHudMixin {
 		if (!stack.isEmpty()) {
 			SlotKey groundKey = new SlotKey(-3, slotIndex);
 			float f = PickupTracker.getBobbingAnimationTimeCustom(groundKey) - tickDelta;
+			if (tmp) {
+				if (slotIndex == 0 || slotIndex == 1 || slotIndex == 9) {
+					System.out.println("READ groundKey=" + groundKey + " f=" + f);
+				}
+				tmp = false;
+			}
 			// float f = stack.getBobbingAnimationTime() - tickDelta;
 			boolean isPickBlock = false;
 			boolean isItemStateChanged = false;
+			boolean hasCustomAnimation = f > 0.0F;
 
-			if (f <= 0.0F) {
+			if (!hasCustomAnimation) {
 				// pick-block!!!
 				// Vanilla isn't animating — check our custom tracker (e.g. pick-block)
 				SlotKey key = new SlotKey(-1, seed - 1);
@@ -87,19 +120,38 @@ public class InGameHudMixin {
 				}
 			}
 
+			MinecraftClient client = MinecraftClient.getInstance();
+
+			ItemStack stack2 = client.player.getInventory().getStack(slotIndex);
+
+			if (slotIndex == 0) {
+
+				if (isPickBlock) {
+					System.out.println("slotIndex: " + slotIndex);
+					System.out.println("itemStack: " + stack2.getName());
+					System.out.println("mode: isPickblock");
+				} else if (isItemStateChanged) {
+					System.out.println("slotIndex: " + slotIndex);
+					System.out.println("itemStack: " + stack2.getName());
+					System.out.println("mode: isItemStateChanged");
+				}
+			}
+
 			AnimationMode mode = hotbarMode;
 			if (isPickBlock) {
 				mode = pickBlockMode;
 			} else if (isItemStateChanged) {
 				mode = itemStateChangedMode;
+				// System.out.println("itemStateChangedMode: " + itemStateChangedMode);
 			}
 
 			// AnimationMode mode = isPickBlock ? pickBlockMode : hotbarMode;
 
 			if (mode == AnimationMode.VANILLA) { // VANILLA MODE
 				// let vanilla handle everything
-				if (!isPickBlock && !isItemStateChanged)
+				if (!isPickBlock && !isItemStateChanged && !hasCustomAnimation) {
 					return;
+				}
 
 				if (f > 0.0F) {
 					float h = 1.0F + f / 5.0F;
@@ -127,9 +179,9 @@ public class InGameHudMixin {
 																												// scale
 
 					context.getMatrices().push();
-					context.getMatrices().translate((float) (x + 8), (float) (y + 12), 0.0F);
+					context.getMatrices().translate((float) (x + 8), (float) (y + 8), 0.0F);
 					context.getMatrices().scale(scale * 1.1F, scale * 1.1F, 1.0F);
-					context.getMatrices().translate((float) (-(x + 8)), (float) (-(y + 12)), 0.0F);
+					context.getMatrices().translate((float) (-(x + 8)), (float) (-(y + 8)), 0.0F);
 				}
 
 				context.drawItem(player, stack, x, y, seed);
@@ -142,7 +194,6 @@ public class InGameHudMixin {
 				ci.cancel();
 				return;
 			}
-
 			// DISABLED MODE
 			context.drawItem(player, stack, x, y, seed);
 			context.drawItemInSlot(MinecraftClient.getInstance().textRenderer, stack, x, y);
@@ -150,4 +201,38 @@ public class InGameHudMixin {
 
 		}
 	}
+
+	@Inject(method = "renderHotbar", at = @At("HEAD"))
+	private void onRenderHotbar(float tickDelta, DrawContext context, CallbackInfo ci) {
+		// System.out.println("onRenderHotbar fired");
+		MinecraftClient client = MinecraftClient.getInstance();
+
+		if (client == null)
+			return;
+
+		System.arraycopy(currentFrameItems, 0, prevFrameItems, 0, 10);
+
+		for (int i = 0; i < 9; i++) {
+			ItemStack s = client.player.getInventory().getStack(i);
+			currentFrameItems[i] = s.isEmpty() ? null : s.getItem();
+		}
+
+		// offhand
+		ItemStack offhand = client.player.getOffHandStack();
+		currentFrameItems[9] = offhand.isEmpty() ? null : offhand.getItem();
+
+		// In onRenderHotbar, after building currentFrameItems:
+		for (int i = 0; i < 10; i++) {
+			if (currentFrameItems[i] != prevFrameItems[i]) {
+				System.out.println("FRAME DIFF slot=" + i
+						+ " prev=" + prevFrameItems[i]
+						+ " curr=" + currentFrameItems[i]);
+				for (int j = 0; j < 9; j++) {
+					ItemStack s = client.player.getInventory().getStack(j);
+					System.out.println("SNAPSHOT slot=" + j + " item=" + (s.isEmpty() ? "null" : s.getItem()));
+				}
+			}
+		}
+	}
+
 }

@@ -66,7 +66,11 @@ public class PickupTracker {
     public static void addGroundPickupSlot(int slotId) {
         if (!ModConfig.get().enabled)
             return;
-        slotsToAnimate.put(groundPickupSlotKey(slotId), ModConfig.get().animationDuration);
+        // slotsToAnimate.put(groundPickupSlotKey(slotId),
+        // ModConfig.get().animationDuration);
+        SlotKey key = groundPickupSlotKey(slotId);
+        System.out.println("addGroundPickupSlot slotId=" + slotId + " key=" + key);
+        slotsToAnimate.put(key, ModConfig.get().animationDuration);
     }
 
     public static void addSlotDelayed(int syncId, int slotId, float delaySeconds) {

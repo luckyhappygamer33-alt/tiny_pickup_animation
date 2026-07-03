@@ -159,9 +159,9 @@ public class HandledScreenMixin {
                 int y = slot.y;
 
                 context.getMatrices().push();
-                context.getMatrices().translate(x + 8, y + 8, 0.0F);
+                context.getMatrices().translate((float) (x + 8), (float) (y + 8), 0.0F);
                 context.getMatrices().scale(scale * 1.1F, scale * 1.1F, 1.0F);
-                context.getMatrices().translate(-(x + 8), -(y + 8), 0.0F);
+                context.getMatrices().translate((float) (-(x + 8)), (float) (-(y + 8)), 0.0F);
 
                 // Draw the animated item
                 context.drawItem(stack, slot.x, slot.y);
