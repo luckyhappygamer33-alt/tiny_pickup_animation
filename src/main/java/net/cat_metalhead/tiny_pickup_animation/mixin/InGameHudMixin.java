@@ -20,12 +20,12 @@ import net.minecraft.item.ItemStack;
 public class InGameHudMixin {
 
 	private final Item[] lastHotbarItems = new Item[10];
-	private final boolean[] wasGroundPickupActive = new boolean[10];
 	private final Item[] itemJustLeft = new Item[10];
 	private final boolean[] pendingItemStateChanged = new boolean[10];
 	private final Item[] prevFrameItems = new Item[10];
 	private final Item[] currentFrameItems = new Item[10];
 	private boolean tmp = false;
+	private final float[] prevBobbingTime = new float[10];
 
 	@Inject(method = "renderHotbarItem", at = @At("HEAD"), cancellable = true)
 	private void onRenderHotbarItem(DrawContext context, int x, int y, float tickDelta, PlayerEntity player,
@@ -80,13 +80,15 @@ public class InGameHudMixin {
 			System.out.println("  registered as: " + (isSwap ? "groundPickup" : "itemStateChanged"));
 		}
 
-		boolean vanillaAnimating = stack.getBobbingAnimationTime() > 0;
-		if (vanillaAnimating && !wasGroundPickupActive[slotIndex]) {
+		float currentBobbing = stack.getBobbingAnimationTime();
+		if (currentBobbing > prevBobbingTime[slotIndex]) {
 			// Ground pickup just started — register our own timer instead of using
 			// vanilla's
 			PickupTracker.addGroundPickupSlot(slotIndex); // new method, new key e.g. SlotKey(-3, slot)
+			System.out.println("###pickup detected slotId=" + slotIndex + " before=" + prev
+					+ " after=" + curr);
 		}
-		wasGroundPickupActive[slotIndex] = vanillaAnimating;
+		prevBobbingTime[slotIndex] = currentBobbing;
 
 		if (!stack.isEmpty()) {
 			SlotKey groundKey = new SlotKey(-3, slotIndex);
