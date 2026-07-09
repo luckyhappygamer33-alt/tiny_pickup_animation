@@ -212,7 +212,7 @@ public class InGameHudMixin {
 		// System.out.println("onRenderHotbar fired");
 		MinecraftClient client = MinecraftClient.getInstance();
 
-		if (client == null || client.currentScreen == null)
+		if (client == null || client.currentScreen != null)
 			return;
 
 		System.arraycopy(currentFrameItems, 0, prevFrameItems, 0, 10);
