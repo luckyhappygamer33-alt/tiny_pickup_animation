@@ -122,32 +122,12 @@ public class InGameHudMixin {
 				}
 			}
 
-			MinecraftClient client = MinecraftClient.getInstance();
-
-			ItemStack stack2 = client.player.getInventory().getStack(slotIndex);
-
-			if (slotIndex == 0) {
-
-				if (isPickBlock) {
-					System.out.println("slotIndex: " + slotIndex);
-					System.out.println("itemStack: " + stack2.getName());
-					System.out.println("mode: isPickblock");
-				} else if (isItemStateChanged) {
-					System.out.println("slotIndex: " + slotIndex);
-					System.out.println("itemStack: " + stack2.getName());
-					System.out.println("mode: isItemStateChanged");
-				}
-			}
-
 			AnimationMode mode = hotbarMode;
 			if (isPickBlock) {
 				mode = pickBlockMode;
 			} else if (isItemStateChanged) {
 				mode = itemStateChangedMode;
-				// System.out.println("itemStateChangedMode: " + itemStateChangedMode);
 			}
-
-			// AnimationMode mode = isPickBlock ? pickBlockMode : hotbarMode;
 
 			if (mode == AnimationMode.VANILLA) { // VANILLA MODE
 				// let vanilla handle everything
