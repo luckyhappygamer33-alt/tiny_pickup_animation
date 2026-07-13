@@ -51,22 +51,23 @@ public class InGameHudMixin {
 
 		if (curr != prev && curr != null && prev != null) {
 
-			System.out.println("RENDER slotIndex=" + slotIndex + " seed=" + seed + " item="
-					+ (stack.isEmpty() ? "null" : stack.getItem()));
+			// System.out.println("RENDER slotIndex=" + slotIndex + " seed=" + seed + "
+			// item="
+			// + (stack.isEmpty() ? "null" : stack.getItem()));
 			// check if curr appears as prev in any other slot --> swap
 			boolean isSwap = false;
-			System.out.println("CHANGE slot=" + slotIndex
-					+ " prev=" + prev
-					+ " curr=" + curr);
+			// System.out.println("CHANGE slot=" + slotIndex
+			// + " prev=" + prev
+			// + " curr=" + curr);
 			for (int i = 0; i < 10; i++) {
 				if (i != slotIndex
 						&& prevFrameItems[i] == curr
 						&& currentFrameItems[i] != prevFrameItems[i]) { // other slot also changed
 					isSwap = true;
 					tmp = true;
-					System.out.println("  SWAP MATCH found at slot=" + i
-							+ " prevFrameItems[i]=" + prevFrameItems[i]
-							+ " currentFrameItems[i]=" + currentFrameItems[i]);
+					// System.out.println(" SWAP MATCH found at slot=" + i
+					// + " prevFrameItems[i]=" + prevFrameItems[i]
+					// + " currentFrameItems[i]=" + currentFrameItems[i]);
 					break;
 				}
 			}
@@ -76,8 +77,9 @@ public class InGameHudMixin {
 			if (!isSwap) {
 				PickupTracker.addItemStateChangedSlot(slotIndex);
 			}
-			System.out.println("  isSwap=" + isSwap);
-			System.out.println("  registered as: " + (isSwap ? "groundPickup" : "itemStateChanged"));
+			// System.out.println(" isSwap=" + isSwap);
+			// System.out.println(" registered as: " + (isSwap ? "groundPickup" :
+			// "itemStateChanged"));
 		}
 
 		float currentBobbing = stack.getBobbingAnimationTime();
@@ -85,20 +87,18 @@ public class InGameHudMixin {
 			// Ground pickup just started — register our own timer instead of using
 			// vanilla's
 			PickupTracker.addGroundPickupSlot(slotIndex); // new method, new key e.g. SlotKey(-3, slot)
-			System.out.println("###pickup detected slotId=" + slotIndex + " before=" + prev
-					+ " after=" + curr);
 		}
 		prevBobbingTime[slotIndex] = currentBobbing;
 
 		if (!stack.isEmpty()) {
 			SlotKey groundKey = new SlotKey(-3, slotIndex);
 			float f = PickupTracker.getBobbingAnimationTimeCustom(groundKey) - tickDelta;
-			if (tmp) {
-				if (slotIndex == 0 || slotIndex == 1 || slotIndex == 9) {
-					System.out.println("READ groundKey=" + groundKey + " f=" + f);
-				}
-				tmp = false;
-			}
+			// if (tmp) {
+			// if (slotIndex == 0 || slotIndex == 1 || slotIndex == 9) {
+			// System.out.println("READ groundKey=" + groundKey + " f=" + f);
+			// }
+			// tmp = false;
+			// }
 			// float f = stack.getBobbingAnimationTime() - tickDelta;
 			boolean isPickBlock = false;
 			boolean isItemStateChanged = false;
@@ -207,17 +207,18 @@ public class InGameHudMixin {
 		currentFrameItems[9] = offhand.isEmpty() ? null : offhand.getItem();
 
 		// In onRenderHotbar, after building currentFrameItems:
-		for (int i = 0; i < 10; i++) {
-			if (currentFrameItems[i] != prevFrameItems[i]) {
-				System.out.println("FRAME DIFF slot=" + i
-						+ " prev=" + prevFrameItems[i]
-						+ " curr=" + currentFrameItems[i]);
-				for (int j = 0; j < 9; j++) {
-					ItemStack s = client.player.getInventory().getStack(j);
-					System.out.println("SNAPSHOT slot=" + j + " item=" + (s.isEmpty() ? "null" : s.getItem()));
-				}
-			}
-		}
+		// for (int i = 0; i < 10; i++) {
+		// if (currentFrameItems[i] != prevFrameItems[i]) {
+		// System.out.println("FRAME DIFF slot=" + i
+		// + " prev=" + prevFrameItems[i]
+		// + " curr=" + currentFrameItems[i]);
+		// for (int j = 0; j < 9; j++) {
+		// ItemStack s = client.player.getInventory().getStack(j);
+		// System.out.println("SNAPSHOT slot=" + j + " item=" + (s.isEmpty() ? "null" :
+		// s.getItem()));
+		// }
+		// }
+		// }
 	}
 
 }

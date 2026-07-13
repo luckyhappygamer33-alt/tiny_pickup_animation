@@ -75,11 +75,9 @@ public class ClientPlayNetworkHandlerMixin {
 
         if (!(client.currentScreen instanceof HandledScreen<?> screen))
             return;
-
         if (syncId != client.player.currentScreenHandler.syncId) {
             return;
         }
-
         ScreenHandler handler = client.player.currentScreenHandler;
         if (slotId < 0 || slotId >= handler.slots.size()) {
             return;

@@ -41,15 +41,15 @@ public class MinecraftClientMixin {
         if (client.player == null)
             return;
 
-        int slotAfter = client.player.getInventory().selectedSlot;
-        ItemStack stackAfter = client.player.getInventory().getStack(slotAfter);
+        int pickSlotAfter = client.player.getInventory().selectedSlot;
+        ItemStack pickStackAfter = client.player.getInventory().getStack(pickSlotAfter);
 
-        boolean slotChanged = slotAfter != pickSlotBefore;
-        boolean stackChanged = !ItemStack.areEqual(pickStackBefore, stackAfter);
+        boolean slotChanged = pickSlotAfter != pickSlotBefore;
+        boolean stackChanged = !ItemStack.areEqual(pickStackBefore, pickStackAfter);
 
         if (slotChanged || stackChanged) {
             // System.out.println("PICK BLOCK slot = " + slotAfter);
-            PickupTracker.addHotbarSlot(slotAfter);
+            PickupTracker.addHotbarSlot(pickSlotAfter);
         }
     }
 }
