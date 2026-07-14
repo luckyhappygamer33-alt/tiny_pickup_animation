@@ -19,12 +19,8 @@ import net.minecraft.item.ItemStack;
 @Mixin(InGameHud.class)
 public class InGameHudMixin {
 
-	private final Item[] lastHotbarItems = new Item[10];
-	private final Item[] itemJustLeft = new Item[10];
-	private final boolean[] pendingItemStateChanged = new boolean[10];
 	private final Item[] prevFrameItems = new Item[10];
 	private final Item[] currentFrameItems = new Item[10];
-	private boolean tmp = false;
 	private final float[] prevBobbingTime = new float[10];
 
 	@Inject(method = "renderHotbarItem", at = @At("HEAD"), cancellable = true)
@@ -41,7 +37,6 @@ public class InGameHudMixin {
 		//// item changed state like fill bucket into water bucket, fill bottles into
 		//// water bottles
 		int slotIndex = seed - 1;
-		// System.out.println("slotIndex: " + slotIndex);
 		if (slotIndex < 0 || slotIndex > 9) {
 			return; // not a regular hotbar slot — skip our logic entirely
 		}
@@ -50,24 +45,13 @@ public class InGameHudMixin {
 		Item curr = currentFrameItems[slotIndex];
 
 		if (curr != prev && curr != null && prev != null) {
-
-			// System.out.println("RENDER slotIndex=" + slotIndex + " seed=" + seed + "
-			// item="
-			// + (stack.isEmpty() ? "null" : stack.getItem()));
 			// check if curr appears as prev in any other slot --> swap
 			boolean isSwap = false;
-			// System.out.println("CHANGE slot=" + slotIndex
-			// + " prev=" + prev
-			// + " curr=" + curr);
 			for (int i = 0; i < 10; i++) {
 				if (i != slotIndex
 						&& prevFrameItems[i] == curr
 						&& currentFrameItems[i] != prevFrameItems[i]) { // other slot also changed
 					isSwap = true;
-					tmp = true;
-					// System.out.println(" SWAP MATCH found at slot=" + i
-					// + " prevFrameItems[i]=" + prevFrameItems[i]
-					// + " currentFrameItems[i]=" + currentFrameItems[i]);
 					break;
 				}
 			}
@@ -77,9 +61,6 @@ public class InGameHudMixin {
 			if (!isSwap) {
 				PickupTracker.addItemStateChangedSlot(slotIndex);
 			}
-			// System.out.println(" isSwap=" + isSwap);
-			// System.out.println(" registered as: " + (isSwap ? "groundPickup" :
-			// "itemStateChanged"));
 		}
 
 		float currentBobbing = stack.getBobbingAnimationTime();
@@ -93,13 +74,7 @@ public class InGameHudMixin {
 		if (!stack.isEmpty()) {
 			SlotKey groundKey = new SlotKey(-3, slotIndex);
 			float f = PickupTracker.getBobbingAnimationTimeCustom(groundKey) - tickDelta;
-			// if (tmp) {
-			// if (slotIndex == 0 || slotIndex == 1 || slotIndex == 9) {
-			// System.out.println("READ groundKey=" + groundKey + " f=" + f);
-			// }
-			// tmp = false;
-			// }
-			// float f = stack.getBobbingAnimationTime() - tickDelta;
+			// float f = stack.getBobbingAnimationTime() - tickDelta; //vanilla way
 			boolean isPickBlock = false;
 			boolean isItemStateChanged = false;
 			boolean hasCustomAnimation = f > 0.0F;
@@ -108,9 +83,9 @@ public class InGameHudMixin {
 				// pick-block!!!
 				// Vanilla isn't animating — check our custom tracker (e.g. pick-block)
 				SlotKey key = new SlotKey(-1, seed - 1);
-				float customF = PickupTracker.getBobbingAnimationTimeCustom(key) - tickDelta;
-				if (customF > 0.0F) {
-					f = customF;
+				float pickBlockF = PickupTracker.getBobbingAnimationTimeCustom(key) - tickDelta;
+				if (pickBlockF > 0.0F) {
+					f = pickBlockF;
 					isPickBlock = true;
 				}
 
@@ -189,7 +164,6 @@ public class InGameHudMixin {
 
 	@Inject(method = "renderHotbar", at = @At("HEAD"))
 	private void onRenderHotbar(float tickDelta, DrawContext context, CallbackInfo ci) {
-		// System.out.println("onRenderHotbar fired");
 		MinecraftClient client = MinecraftClient.getInstance();
 
 		if (client == null || client.currentScreen != null)

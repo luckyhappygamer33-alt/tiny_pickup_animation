@@ -69,7 +69,6 @@ public class PickupTracker {
         // slotsToAnimate.put(groundPickupSlotKey(slotId),
         // ModConfig.get().animationDuration);
         SlotKey key = groundPickupSlotKey(slotId);
-        System.out.println("addGroundPickupSlot slotId=" + slotId + " key=" + key);
         slotsToAnimate.put(key, ModConfig.get().animationDuration);
     }
 

@@ -21,8 +21,6 @@ public class ClientPlayerInteractionManagerMixin {
     // it.
     @Inject(method = "pickFromInventory", at = @At("HEAD"))
     private void onPickFromInventory(int slotIndex, CallbackInfo ci) {
-        // System.out.println("setPickBlockFromInventory stored slotIndex = " +
-        // slotIndex);
         PickupTracker.setPickBlockFromInventory(slotIndex);
     }
 }

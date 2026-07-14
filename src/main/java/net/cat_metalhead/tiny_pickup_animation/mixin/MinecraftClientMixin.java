@@ -46,9 +46,7 @@ public class MinecraftClientMixin {
 
         boolean slotChanged = pickSlotAfter != pickSlotBefore;
         boolean stackChanged = !ItemStack.areEqual(pickStackBefore, pickStackAfter);
-
         if (slotChanged || stackChanged) {
-            // System.out.println("PICK BLOCK slot = " + slotAfter);
             PickupTracker.addHotbarSlot(pickSlotAfter);
         }
     }
