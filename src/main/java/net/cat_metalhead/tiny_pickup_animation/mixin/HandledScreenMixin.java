@@ -41,7 +41,6 @@ public class HandledScreenMixin {
     private boolean loomOutputWasEmpty = true;
     private boolean smithingOutputWasEmpty = true;
     private boolean stonecutterOutputWasEmpty = true;
-    private final Item[] lastHotbarItems = new Item[9];
 
     private float lastTickDelta = 0f;
 
@@ -141,8 +140,10 @@ public class HandledScreenMixin {
         // the timer to 5.0F on every frame while the animation is already running.
         if (MinecraftClient.getInstance().currentScreen instanceof CreativeInventoryScreen
                 && slot.inventory instanceof PlayerInventory && slot.getIndex() < 9) {
+
             if (stack.getBobbingAnimationTime() > 0 && !PickupTracker.getSlotsToAnimate().containsKey(key)
                     && ModConfig.get().inventoryAnimationEnabled) {
+                System.out.println("check4");
                 PickupTracker.addSlot(handler.syncId, handler.slots.indexOf(slot));
             }
         }
@@ -151,6 +152,7 @@ public class HandledScreenMixin {
             float f = PickupTracker.getBobbingAnimationTimeCustom(key) - lastTickDelta;
 
             if (f > 0.0F) {
+                System.out.println("check5");
                 float progress = f / ModConfig.get().animationDuration;
                 // float scale = 1.0F + ModConfig.get().bounceScale * (float) Math.sin(progress
                 // * Math.PI); // 0.25F is

@@ -8,13 +8,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.cat_metalhead.tiny_pickup_animation.ModConfig;
 import net.cat_metalhead.tiny_pickup_animation.PickupTracker;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
-import net.minecraft.screen.AnvilScreenHandler;
 import net.minecraft.screen.BrewingStandScreenHandler;
 import net.minecraft.screen.CartographyTableScreenHandler;
 import net.minecraft.screen.EnchantmentScreenHandler;
@@ -41,7 +39,6 @@ public class ClientPlayNetworkHandlerMixin {
 
         if (!(client.currentScreen instanceof HandledScreen<?> screen))
             return;
-        ;
 
         int slotId = packet.getSlot();
         ScreenHandler handler = client.player.currentScreenHandler;
@@ -56,7 +53,6 @@ public class ClientPlayNetworkHandlerMixin {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client == null || client.player == null)
             return;
-
         int syncId = packet.getSyncId();
         int slotId = packet.getSlot();
 
@@ -174,10 +170,6 @@ public class ClientPlayNetworkHandlerMixin {
                 // player inventory slot — full animation logic
                 if (!PickupTracker.isSuppressInventoryAnimation() && ModConfig.get().inventoryAnimationEnabled) {
                     PickupTracker.addSlot(syncId, slotId);
-                    // if (slotId >= 36 && slotId <= 44) { //PROBABLY REDUNDANT
-                    // System.out.println("villager said huh");
-                    // PickupTracker.addHotbarSlot(slotId - 36);
-                    // } //PROBABLY REDUNDANT
                 }
             } else if (wasEmpty) {
                 // System.out.println("block container case");
