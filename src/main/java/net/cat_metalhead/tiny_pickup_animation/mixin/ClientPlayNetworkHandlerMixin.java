@@ -37,7 +37,7 @@ public class ClientPlayNetworkHandlerMixin {
         if (client == null || client.player == null)
             return;
 
-        if (!(client.currentScreen instanceof HandledScreen<?> screen))
+        if (!(client.currentScreen instanceof HandledScreen<?>))
             return;
 
         int slotId = packet.getSlot();
@@ -57,7 +57,7 @@ public class ClientPlayNetworkHandlerMixin {
         int slotId = packet.getSlot();
 
         // Pick-block where the target item was in the main inventory (not already in
-        // hotbar).
+        // hotbar). (only survival)
         // The client sends pickFromInventory to the server, which moves the item and
         // confirms
         // via this packet. The flag was set in ClientPlayerInteractionManagerMixin when
@@ -69,7 +69,7 @@ public class ClientPlayNetworkHandlerMixin {
             PickupTracker.setPickBlockFromInventory(null);
         }
 
-        if (!(client.currentScreen instanceof HandledScreen<?> screen))
+        if (!(client.currentScreen instanceof HandledScreen<?>))
             return;
         if (syncId != client.player.currentScreenHandler.syncId) {
             return;
@@ -109,12 +109,13 @@ public class ClientPlayNetworkHandlerMixin {
         // smelting
         // - Default player inventory: full conditions (wasEmpty, countIncreased,
         // itemChanged)
-        // Also registers hotbar key when the updated slot is in the hotbar range
-        // (36-44)
         // - Default block container: wasEmpty only — ignores hopper/dispenser top-ups
         if (isCartographyOutputSlot) {
             // System.out.println("cartography table case");
-            // handled in drawSlot via frame comparison — suppress default case
+            // Cartography table output is computed client-side without a server packet,
+            // so packet detection here would be unreliable. Handled instead via frame-diff
+            // in HandledScreenMixin.drawSlot. This empty block exists solely to prevent
+            // fallthrough to the default wasEmpty/countIncreased branch below.
         } else if (isEnchantingOutputSlot) {
             // System.out.println("enchanting table case");
             boolean enchantingCompleted = !slotStackBefore.isEmpty() && !slotStackAfter.isEmpty()
@@ -140,20 +141,12 @@ public class ClientPlayNetworkHandlerMixin {
 
                     boolean newScreen = syncId != lastCraftingSyncId;
 
-                    // System.out
-                    // .println("lastCraftingOutputItem current value = " +
-                    // PickupTracker.getLastCraftingOutputItem());
-                    // System.out.println("slotStackAfter item = " + slotStackAfter.getItem());
                     boolean newRecipe = slotStackAfter.getItem() != PickupTracker.getLastCraftingOutputItem();
-                    // System.out.println("newScreen " + newScreen);
-                    // System.out.println("newRecipe " + newRecipe);
 
                     if (newScreen || newRecipe) {
                         PickupTracker.addSlot(syncId, slotId);
                     }
                     lastCraftingSyncId = syncId;
-                    // System.out.println("lastCraftingOutputItem set to " +
-                    // slotStackAfter.getItem().getName());
                     PickupTracker.setLastCraftingOutputItem(slotStackAfter.getItem());
                 }
             }

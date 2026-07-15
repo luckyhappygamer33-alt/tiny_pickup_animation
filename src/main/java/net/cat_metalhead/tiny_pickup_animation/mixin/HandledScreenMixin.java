@@ -16,7 +16,6 @@ import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.AnvilScreenHandler;
 import net.minecraft.screen.CartographyTableScreenHandler;
@@ -43,20 +42,6 @@ public class HandledScreenMixin {
     private boolean stonecutterOutputWasEmpty = true;
 
     private float lastTickDelta = 0f;
-
-    // @Inject(method = "init", at = @At("HEAD"))
-    // private void onInit(CallbackInfo ci) {
-    // // Snapshot current hotbar items so frame-diff detection in drawSlot doesn't
-    // // animate existing items as "new" the first time the screen renders.
-    // // Covers the creative inventory screen where ground pickups bypass packet
-    // // detection.
-    // for (Slot slot : handler.slots) {
-    // if (slot.inventory instanceof PlayerInventory && slot.getIndex() < 9) {
-    // lastHotbarItems[slot.getIndex()] = slot.getStack().isEmpty() ? null :
-    // slot.getStack().getItem();
-    // }
-    // }
-    // }
 
     @Inject(method = "drawSlot", at = @At("HEAD"), cancellable = true)
     private void onDrawSlot(DrawContext context, Slot slot, CallbackInfo ci) {
@@ -131,28 +116,24 @@ public class HandledScreenMixin {
             stonecutterOutputWasEmpty = isEmpty;
         }
 
-        // Creative inventory renders its hotbar via drawSlot rather than
-        // renderHotbarItem,
-        // so InGameHudMixin never fires for it. Ground pickups set vanilla
-        // bobbingAnimationTime,
-        // which we detect here to bridge the gap. Guard with containsKey to prevent
-        // resetting
-        // the timer to 5.0F on every frame while the animation is already running.
+        // Creative inventory hotbar slots (0-8) are not caught by the packet handler
+        // detection in ClientPlayNetworkHandlerMixin when in creative mode — either due
+        // to slot index mismatch or the creative screen handler behaving differently.
+        // Instead we detect ground pickups here via vanilla bobbingAnimationTime > 0.
+        // containsKey guard prevents resetting the timer on every frame while
+        // animating.
         if (MinecraftClient.getInstance().currentScreen instanceof CreativeInventoryScreen
                 && slot.inventory instanceof PlayerInventory && slot.getIndex() < 9) {
 
             if (stack.getBobbingAnimationTime() > 0 && !PickupTracker.getSlotsToAnimate().containsKey(key)
                     && ModConfig.get().inventoryAnimationEnabled) {
-                System.out.println("check4");
                 PickupTracker.addSlot(handler.syncId, handler.slots.indexOf(slot));
             }
         }
 
         if (PickupTracker.getSlotsToAnimate().containsKey(key)) {
             float f = PickupTracker.getBobbingAnimationTimeCustom(key) - lastTickDelta;
-
             if (f > 0.0F) {
-                System.out.println("check5");
                 float progress = f / ModConfig.get().animationDuration;
                 // float scale = 1.0F + ModConfig.get().bounceScale * (float) Math.sin(progress
                 // * Math.PI); // 0.25F is
@@ -204,7 +185,6 @@ public class HandledScreenMixin {
                     .findFirst().orElse(null);
             if (outputSlot != null && outputSlot.getStack().isEmpty()) {
                 PickupTracker.resetLastCraftingOutputItem();
-                // System.out.println("lastCraftingOutputItem reset to null");
             }
 
         }

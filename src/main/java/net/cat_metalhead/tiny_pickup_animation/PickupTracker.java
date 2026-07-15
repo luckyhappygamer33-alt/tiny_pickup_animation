@@ -133,12 +133,10 @@ public class PickupTracker {
     }
 
     public static void setLastCraftingOutputItem(Item item) {
-        // System.out.println("setLastCraftingOutputItem called with: " + item);
         lastCraftingOutputItem = item;
     }
 
     public static void resetLastCraftingOutputItem() {
-        // System.out.println("resetLastCraftingOutputItem called");
         lastCraftingOutputItem = null;
     }
 

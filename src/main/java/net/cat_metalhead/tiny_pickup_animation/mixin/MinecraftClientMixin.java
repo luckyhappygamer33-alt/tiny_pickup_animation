@@ -31,7 +31,8 @@ public class MinecraftClientMixin {
     // Covers two cases:
     // - Item already in hotbar: selectedSlot switches to it (slotChanged)
     // - Empty hotbar slot gets item in creative: stack fills (stackChanged)
-    // The third case — item in main inventory jumping to hotbar — is NOT detectable
+    // The third case — item in main inventory jumping to hotbar (survival only) —
+    // is NOT detectable
     // here since the client inventory hasn't updated yet. That case is handled by
     // ClientPlayerInteractionManagerMixin + ClientPlayNetworkHandlerMixin via a
     // flag.

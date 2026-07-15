@@ -19,6 +19,7 @@ public class ClientPlayerInteractionManagerMixin {
     // next
     // hotbar slot update packet (36-44) as a pick-block confirmation and animate
     // it.
+    // !!only for survival
     @Inject(method = "pickFromInventory", at = @At("HEAD"))
     private void onPickFromInventory(int slotIndex, CallbackInfo ci) {
         PickupTracker.setPickBlockFromInventory(slotIndex);

@@ -34,13 +34,22 @@ public class InGameHudMixin {
 		AnimationMode pickBlockMode = ModConfig.get().pickBlockAnimationMode;
 		AnimationMode itemStateChangedMode = ModConfig.get().itemStateChangedAnimationMode;
 
-		//// item changed state like fill bucket into water bucket, fill bottles into
-		//// water bottles
 		int slotIndex = seed - 1;
 		if (slotIndex < 0 || slotIndex > 9) {
 			return; // not a regular hotbar slot — skip our logic entirely
 		}
 
+		// Detects two hotbar-slot scenarios that don't produce a bobbingAnimationTime
+		// jump:
+		// 1. Swap — two slots exchange items simultaneously (e.g. hotbar - offhand).
+		// Identified by finding another slot where prevFrameItems[i] == curr AND
+		// that slot also changed this frame. Registered as ground pickup so hotbarMode
+		// applies.
+		// 2. Item-state-change — item type changed in place with no corresponding swap
+		// (e.g. empty bucket -> water bucket, glass bottle -> water bottle).
+		// Registered separately so itemStateChangedMode applies independently.
+		// Uses prevFrameItems/currentFrameItems snapshots taken in onRenderHotbar so
+		// all slots are compared against the same frame boundary simultaneously.
 		Item prev = prevFrameItems[slotIndex];
 		Item curr = currentFrameItems[slotIndex];
 
@@ -128,7 +137,6 @@ public class InGameHudMixin {
 				ci.cancel();
 				return;
 			} else if (mode == AnimationMode.CUSTOM) { // CUSTOM (MOD) MODE
-				// draw item but suppress all animation
 				if (f > 0.0F) {
 					float progress = f / ModConfig.get().animationDuration;
 					// float scale = 1.0F + ModConfig.get().bounceScale * (float) Math.sin(progress
@@ -162,6 +170,14 @@ public class InGameHudMixin {
 		}
 	}
 
+	// Snapshots all 10 hotbar slots (0-8 + offhand) once per frame before
+	// renderHotbarItem fires for individual slots. This ensures prevFrameItems and
+	// currentFrameItems are fully populated for all slots simultaneously, making
+	// cross-slot swap detection in renderHotbarItem reliable — if snapshotted
+	// per-slot inside renderHotbarItem instead, earlier slots wouldn't yet have
+	// their updated state when later slots are processed.
+	// Skipped when a screen is open — packet handler covers slot changes then,
+	// and running here would cause double animations on hotbar slots.
 	@Inject(method = "renderHotbar", at = @At("HEAD"))
 	private void onRenderHotbar(float tickDelta, DrawContext context, CallbackInfo ci) {
 		MinecraftClient client = MinecraftClient.getInstance();
@@ -179,20 +195,6 @@ public class InGameHudMixin {
 		// offhand
 		ItemStack offhand = client.player.getOffHandStack();
 		currentFrameItems[9] = offhand.isEmpty() ? null : offhand.getItem();
-
-		// In onRenderHotbar, after building currentFrameItems:
-		// for (int i = 0; i < 10; i++) {
-		// if (currentFrameItems[i] != prevFrameItems[i]) {
-		// System.out.println("FRAME DIFF slot=" + i
-		// + " prev=" + prevFrameItems[i]
-		// + " curr=" + currentFrameItems[i]);
-		// for (int j = 0; j < 9; j++) {
-		// ItemStack s = client.player.getInventory().getStack(j);
-		// System.out.println("SNAPSHOT slot=" + j + " item=" + (s.isEmpty() ? "null" :
-		// s.getItem()));
-		// }
-		// }
-		// }
 	}
 
 }
