@@ -11,7 +11,7 @@ import net.minecraft.util.Identifier;
 
 public class ModConfig {
         public static final ConfigClassHandler<ModConfig> HANDLER = ConfigClassHandler.createBuilder(ModConfig.class)
-                        .id(new Identifier("tiny_pickup_animation", "config"))
+                        .id(Identifier.of("tiny_pickup_animation", "config"))
                         .serializer(config -> GsonConfigSerializerBuilder.create(config)
                                         .setPath(FabricLoader.getInstance().getConfigDir()
                                                         .resolve("tiny_pickup_animation.json"))
@@ -59,6 +59,10 @@ public class ModConfig {
         @AutoGen(category = "workstations")
         @dev.isxander.yacl3.config.v2.api.autogen.Boolean
         public boolean craftingAnimationEnabled = true;
+        @SerialEntry
+        @AutoGen(category = "workstations")
+        @dev.isxander.yacl3.config.v2.api.autogen.Boolean
+        public boolean crafterAnimationEnabled = true;
         @SerialEntry
         @AutoGen(category = "workstations")
         @dev.isxander.yacl3.config.v2.api.autogen.Boolean

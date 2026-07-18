@@ -17,6 +17,7 @@ import net.minecraft.screen.BrewingStandScreenHandler;
 import net.minecraft.screen.CartographyTableScreenHandler;
 import net.minecraft.screen.EnchantmentScreenHandler;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.slot.CrafterOutputSlot;
 import net.minecraft.screen.slot.CraftingResultSlot;
 import net.minecraft.screen.slot.FurnaceOutputSlot;
 import net.minecraft.screen.slot.Slot;
@@ -150,6 +151,15 @@ public class ClientPlayNetworkHandlerMixin {
                     PickupTracker.setLastCraftingOutputItem(slotStackAfter.getItem());
                 }
             }
+        } else if (slot instanceof CrafterOutputSlot) {
+            if (ModConfig.get().crafterAnimationEnabled) {
+                // System.out.println("crafter case");
+
+                if (wasEmpty || itemChanged) {
+                    PickupTracker.addSlot(syncId, slotId);
+                }
+            }
+
         } else if (slot instanceof FurnaceOutputSlot) {
             // System.out.println("furnace case");
             if (wasEmpty && ModConfig.get().furnaceAnimationEnabled) {

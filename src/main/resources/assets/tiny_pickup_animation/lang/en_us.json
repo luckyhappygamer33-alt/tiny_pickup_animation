@@ -20,6 +20,8 @@
     "yacl3.config.tiny_pickup_animation:config.category.workstations": "Block Screens",
     "yacl3.config.tiny_pickup_animation:config.craftingAnimationEnabled": "Crafting Table & 2x2 Crafting",
     "yacl3.config.tiny_pickup_animation:config.craftingAnimationEnabled.desc": "Enables or disables animations on the crafting output slot when a new recipe result appears.",
+    "yacl3.config.tiny_pickup_animation:config.crafterAnimationEnabled": "Crafter",
+    "yacl3.config.tiny_pickup_animation:config.crafterAnimationEnabled.desc": "Enables or disables animations on the crafter output slot when a crafting result appears.",
     "yacl3.config.tiny_pickup_animation:config.furnaceAnimationEnabled": "Furnaces",
     "yacl3.config.tiny_pickup_animation:config.furnaceAnimationEnabled.desc": "Enables or disables animations on the output slot of furnaces, blast furnaces and smokers when smelting completes.",
     "yacl3.config.tiny_pickup_animation:config.brewingStandAnimationEnabled": "Brewing Stand",
