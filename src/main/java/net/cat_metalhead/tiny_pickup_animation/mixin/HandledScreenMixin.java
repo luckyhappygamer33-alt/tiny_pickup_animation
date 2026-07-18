@@ -159,7 +159,7 @@ public class HandledScreenMixin {
 
                 // Animation finished - draw normally one last time
                 context.drawItem(stack, slot.x, slot.y);
-                context.drawItemInSlot(MinecraftClient.getInstance().textRenderer, stack, slot.x, slot.y);
+                context.drawStackOverlay(MinecraftClient.getInstance().textRenderer, stack, slot.x, slot.y);
             }
         }
     }

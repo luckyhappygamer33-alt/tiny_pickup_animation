@@ -17,6 +17,7 @@ import net.minecraft.screen.BrewingStandScreenHandler;
 import net.minecraft.screen.CartographyTableScreenHandler;
 import net.minecraft.screen.EnchantmentScreenHandler;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.StonecutterScreenHandler;
 import net.minecraft.screen.slot.CrafterOutputSlot;
 import net.minecraft.screen.slot.CraftingResultSlot;
 import net.minecraft.screen.slot.FurnaceOutputSlot;
@@ -94,6 +95,7 @@ public class ClientPlayNetworkHandlerMixin {
                 && slotId >= 0 && slotId <= 2;
         boolean isEnchantingOutputSlot = handler instanceof EnchantmentScreenHandler && slotId == 0;
         boolean isCartographyOutputSlot = handler instanceof CartographyTableScreenHandler && slotId == 2;
+        boolean isStonecutterOutputSlot = handler instanceof StonecutterScreenHandler && slotId == 1;
 
         // Route the slot update to the appropriate animation logic based on screen/slot
         // type.
@@ -111,7 +113,10 @@ public class ClientPlayNetworkHandlerMixin {
         // - Default player inventory: full conditions (wasEmpty, countIncreased,
         // itemChanged)
         // - Default block container: wasEmpty only — ignores hopper/dispenser top-ups
-        if (isCartographyOutputSlot) {
+        if (isStonecutterOutputSlot) {
+            // System.out.println("stonec cutter case");
+            // same as cartography table case
+        } else if (isCartographyOutputSlot) {
             // System.out.println("cartography table case");
             // Cartography table output is computed client-side without a server packet,
             // so packet detection here would be unreliable. Handled instead via frame-diff
@@ -175,7 +180,7 @@ public class ClientPlayNetworkHandlerMixin {
                     PickupTracker.addSlot(syncId, slotId);
                 }
             } else if (wasEmpty) {
-                // System.out.println("block container case");
+                System.out.println("block container case");
 
                 // block container slot — only animate on empty-->filled
                 if (ModConfig.get().containersAnimationEnabled) {

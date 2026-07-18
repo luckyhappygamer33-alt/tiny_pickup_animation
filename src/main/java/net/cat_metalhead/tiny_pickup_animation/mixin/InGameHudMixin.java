@@ -135,7 +135,7 @@ public class InGameHudMixin {
 					context.getMatrices().pop();
 				}
 
-				context.drawItemInSlot(MinecraftClient.getInstance().textRenderer, stack, x, y);
+				context.drawStackOverlay(MinecraftClient.getInstance().textRenderer, stack, x, y);
 
 				ci.cancel();
 				return;
@@ -160,14 +160,14 @@ public class InGameHudMixin {
 					context.getMatrices().pop();
 				}
 
-				context.drawItemInSlot(MinecraftClient.getInstance().textRenderer, stack, x, y);
+				context.drawStackOverlay(MinecraftClient.getInstance().textRenderer, stack, x, y);
 
 				ci.cancel();
 				return;
 			}
 			// DISABLED MODE
 			context.drawItem(player, stack, x, y, seed);
-			context.drawItemInSlot(MinecraftClient.getInstance().textRenderer, stack, x, y);
+			context.drawStackOverlay(MinecraftClient.getInstance().textRenderer, stack, x, y);
 			ci.cancel();
 
 		}
