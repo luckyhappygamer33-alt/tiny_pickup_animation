@@ -11,6 +11,7 @@ public class TinyPickupAnimation implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		ModConfig.HANDLER.load();
 		LOGGER.info("Mod initialized!");
 	}
 }

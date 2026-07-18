@@ -5,31 +5,44 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import net.cat_metalhead.tiny_pickup_animation.ModConfig;
 import net.cat_metalhead.tiny_pickup_animation.PickupTracker;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
+import net.minecraft.screen.BrewingStandScreenHandler;
+import net.minecraft.screen.CartographyTableScreenHandler;
+import net.minecraft.screen.EnchantmentScreenHandler;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.slot.CrafterOutputSlot;
+import net.minecraft.screen.slot.CraftingResultSlot;
+import net.minecraft.screen.slot.FurnaceOutputSlot;
 import net.minecraft.screen.slot.Slot;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public class ClientPlayNetworkHandlerMixin {
     private ItemStack slotStackBefore = ItemStack.EMPTY;
+    private int lastCraftingSyncId = -1;
 
     @Inject(method = "onScreenHandlerSlotUpdate", at = @At("HEAD"))
     private void onScreenHandlerSlotUpdateHead(ScreenHandlerSlotUpdateS2CPacket packet, CallbackInfo ci) {
+        // Snapshot the slot's item stack before the packet is applied.
+        // Used in the RETURN inject to compare before/after state and determine
+        // whether the slot gained items (wasEmpty, countIncreased, itemChanged).
+        // Only runs when a HandledScreen is open since ground pickups with no
+        // open screen are handled separately via vanilla bobbingAnimationTime.
         MinecraftClient client = MinecraftClient.getInstance();
         if (client == null || client.player == null)
             return;
-        if (!(client.currentScreen instanceof HandledScreen<?> screen))
+
+        if (!(client.currentScreen instanceof HandledScreen<?>))
             return;
 
-        // System.out.println("check1-head");
-
         int slotId = packet.getSlot();
-        ScreenHandler handler = screen.getScreenHandler();
+        ScreenHandler handler = client.player.currentScreenHandler;
         if (slotId < 0 || slotId >= handler.slots.size())
             return;
 
@@ -41,20 +54,31 @@ public class ClientPlayNetworkHandlerMixin {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client == null || client.player == null)
             return;
-        if (!(client.currentScreen instanceof HandledScreen<?> screen))
-            return;
-
-        // System.out.println("check1-return");
-
         int syncId = packet.getSyncId();
         int slotId = packet.getSlot();
 
-        if (syncId != client.player.playerScreenHandler.syncId)
-            return;
+        // Pick-block where the target item was in the main inventory (not already in
+        // hotbar). (only survival)
+        // The client sends pickFromInventory to the server, which moves the item and
+        // confirms
+        // via this packet. The flag was set in ClientPlayerInteractionManagerMixin when
+        // pickFromInventory fired — we can't detect the destination slot any earlier
+        // since
+        // the client inventory isn't updated until this server confirmation arrives.
+        if (PickupTracker.isPickBlockFromInventory() && slotId >= 36 && slotId <= 44) {
+            PickupTracker.addHotbarSlot(slotId - 36);
+            PickupTracker.setPickBlockFromInventory(null);
+        }
 
-        ScreenHandler handler = screen.getScreenHandler();
-        if (slotId < 0 || slotId >= handler.slots.size())
+        if (!(client.currentScreen instanceof HandledScreen<?>))
             return;
+        if (syncId != client.player.currentScreenHandler.syncId) {
+            return;
+        }
+        ScreenHandler handler = client.player.currentScreenHandler;
+        if (slotId < 0 || slotId >= handler.slots.size()) {
+            return;
+        }
 
         Slot slot = handler.slots.get(slotId);
         ItemStack slotStackAfter = slot.getStack();
@@ -63,15 +87,101 @@ public class ClientPlayNetworkHandlerMixin {
         boolean countIncreased = !slotStackBefore.isEmpty() && !slotStackAfter.isEmpty()
                 && slotStackBefore.getItem() == slotStackAfter.getItem()
                 && slotStackAfter.getCount() > slotStackBefore.getCount();
+        boolean itemChanged = !slotStackBefore.isEmpty() && !slotStackAfter.isEmpty()
+                && slotStackBefore.getItem() != slotStackAfter.getItem();
 
-        // System.out.println("pendingPickup = " + PickupState.pendingPickup);
-        // System.out.println("wasEmpty = " + wasEmpty);
-        // System.out.println("countIncreased = " + countIncreased);
+        boolean isBrewingOutputSlot = handler instanceof BrewingStandScreenHandler
+                && slotId >= 0 && slotId <= 2;
+        boolean isEnchantingOutputSlot = handler instanceof EnchantmentScreenHandler && slotId == 0;
+        boolean isCartographyOutputSlot = handler instanceof CartographyTableScreenHandler && slotId == 2;
 
-        // trigger if pickup from world OR if slot genuinely gained items
-        if (wasEmpty || countIncreased) {
-            PickupTracker.addSlot(slot);
-            // System.out.println("piiick");
+        // Route the slot update to the appropriate animation logic based on screen/slot
+        // type.
+        // Each case handles a different detection strategy:
+        // - Cartography: suppressed here, handled by frame diff in
+        // HandledScreenMixin.drawSlot
+        // - Enchanting: uses !areEqual since enchanting modifies NBT without changing
+        // item type
+        // - Brewing: uses !areEqual + staggered delay for the cascade effect across 3
+        // slots
+        // - CraftingResultSlot: suppresses spam-click repetition via
+        // lastCraftingOutputItem tracking
+        // - FurnaceOutputSlot: wasEmpty only — animates once when first item finishes
+        // smelting
+        // - Default player inventory: full conditions (wasEmpty, countIncreased,
+        // itemChanged)
+        // - Default block container: wasEmpty only — ignores hopper/dispenser top-ups
+        if (isCartographyOutputSlot) {
+            // System.out.println("cartography table case");
+            // Cartography table output is computed client-side without a server packet,
+            // so packet detection here would be unreliable. Handled instead via frame-diff
+            // in HandledScreenMixin.drawSlot. This empty block exists solely to prevent
+            // fallthrough to the default wasEmpty/countIncreased branch below.
+        } else if (isEnchantingOutputSlot) {
+            // System.out.println("enchanting table case");
+            boolean enchantingCompleted = !slotStackBefore.isEmpty() && !slotStackAfter.isEmpty()
+                    && !ItemStack.areEqual(slotStackBefore, slotStackAfter);
+            if (enchantingCompleted && ModConfig.get().enchantingTableAnimationEnabled) {
+
+                PickupTracker.addSlot(syncId, slotId);
+            }
+        } else if (isBrewingOutputSlot) {
+            // System.out.println("brewing stand case");
+            boolean brewingCompleted = !slotStackBefore.isEmpty() && !slotStackAfter.isEmpty()
+                    && !ItemStack.areEqual(slotStackBefore, slotStackAfter);
+            if (brewingCompleted && ModConfig.get().brewingStandAnimationEnabled) {
+
+                float delay = slotId * ModConfig.get().brewingStandCascadeDelay;
+                PickupTracker.addSlotDelayed(syncId, slotId, delay);
+            }
+        } else if (slot instanceof CraftingResultSlot) {
+
+            if (ModConfig.get().craftingAnimationEnabled) {
+                // System.out.println("crafting table case");
+                if (wasEmpty || itemChanged) {
+
+                    boolean newScreen = syncId != lastCraftingSyncId;
+
+                    boolean newRecipe = slotStackAfter.getItem() != PickupTracker.getLastCraftingOutputItem();
+
+                    if (newScreen || newRecipe) {
+                        PickupTracker.addSlot(syncId, slotId);
+                    }
+                    lastCraftingSyncId = syncId;
+                    PickupTracker.setLastCraftingOutputItem(slotStackAfter.getItem());
+                }
+            }
+        } else if (slot instanceof CrafterOutputSlot) {
+            if (ModConfig.get().crafterAnimationEnabled) {
+                // System.out.println("crafter case");
+
+                if (wasEmpty || itemChanged) {
+                    PickupTracker.addSlot(syncId, slotId);
+                }
+            }
+
+        } else if (slot instanceof FurnaceOutputSlot) {
+            // System.out.println("furnace case");
+            if (wasEmpty && ModConfig.get().furnaceAnimationEnabled) {
+
+                PickupTracker.addSlot(syncId, slotId);
+            }
+        } else if (wasEmpty || countIncreased) {
+            if (slot.inventory instanceof PlayerInventory) {
+                // System.out.println("default case");
+
+                // player inventory slot — full animation logic
+                if (!PickupTracker.isSuppressInventoryAnimation() && ModConfig.get().inventoryAnimationEnabled) {
+                    PickupTracker.addSlot(syncId, slotId);
+                }
+            } else if (wasEmpty) {
+                // System.out.println("block container case");
+
+                // block container slot — only animate on empty-->filled
+                if (ModConfig.get().containersAnimationEnabled) {
+                    PickupTracker.addSlot(syncId, slotId);
+                }
+            }
         }
     }
 }
