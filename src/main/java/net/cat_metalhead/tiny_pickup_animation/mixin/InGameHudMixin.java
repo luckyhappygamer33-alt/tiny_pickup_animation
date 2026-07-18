@@ -179,7 +179,7 @@ public class InGameHudMixin {
 	// Skipped when a screen is open — packet handler covers slot changes then,
 	// and running here would cause double animations on hotbar slots.
 	@Inject(method = "renderHotbar", at = @At("HEAD"))
-	private void onRenderHotbar(float tickDelta, DrawContext context, CallbackInfo ci) {
+	private void onRenderHotbar(DrawContext context, float tickDelta, CallbackInfo ci) {
 		MinecraftClient client = MinecraftClient.getInstance();
 
 		if (client == null || client.currentScreen != null)
