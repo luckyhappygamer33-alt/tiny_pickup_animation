@@ -25,7 +25,8 @@ public class InGameHudMixin {
 	private final float[] prevBobbingTime = new float[10];
 
 	@Inject(method = "renderHotbarItem", at = @At("HEAD"), cancellable = true)
-	private void onRenderHotbarItem(DrawContext context, int x, int y, float tickDelta, PlayerEntity player,
+	private void onRenderHotbarItem(DrawContext context, int x, int y, RenderTickCounter tickCounter,
+			PlayerEntity player,
 			ItemStack stack, int seed, CallbackInfo ci) {
 
 		if (!ModConfig.get().enabled)
@@ -83,7 +84,7 @@ public class InGameHudMixin {
 
 		if (!stack.isEmpty()) {
 			SlotKey groundKey = new SlotKey(-3, slotIndex);
-			float f = PickupTracker.getBobbingAnimationTimeCustom(groundKey) - tickDelta;
+			float f = PickupTracker.getBobbingAnimationTimeCustom(groundKey) - tickCounter.getTickDelta(false);
 			// float f = stack.getBobbingAnimationTime() - tickDelta; //vanilla way
 			boolean isPickBlock = false;
 			boolean isItemStateChanged = false;
@@ -93,14 +94,15 @@ public class InGameHudMixin {
 				// pick-block!!!
 				// Vanilla isn't animating — check our custom tracker (e.g. pick-block)
 				SlotKey key = new SlotKey(-1, seed - 1);
-				float pickBlockF = PickupTracker.getBobbingAnimationTimeCustom(key) - tickDelta;
+				float pickBlockF = PickupTracker.getBobbingAnimationTimeCustom(key) - tickCounter.getTickDelta(false);
 				if (pickBlockF > 0.0F) {
 					f = pickBlockF;
 					isPickBlock = true;
 				}
 
 				SlotKey itemStateKey = new SlotKey(-2, seed - 1);
-				float itemStateF = PickupTracker.getBobbingAnimationTimeCustom(itemStateKey) - tickDelta;
+				float itemStateF = PickupTracker.getBobbingAnimationTimeCustom(itemStateKey) - tickCounter
+						.getTickDelta(false);
 				if (itemStateF > 0.0F) {
 					f = itemStateF;
 					isItemStateChanged = true;
@@ -180,7 +182,7 @@ public class InGameHudMixin {
 	// Skipped when a screen is open — packet handler covers slot changes then,
 	// and running here would cause double animations on hotbar slots.
 	@Inject(method = "renderHotbar", at = @At("HEAD"))
-	private void onRenderHotbar(float tickDelta, DrawContext context, CallbackInfo ci) {
+	private void onRenderHotbar(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
 		MinecraftClient client = MinecraftClient.getInstance();
 
 		if (client == null || client.currentScreen != null)
