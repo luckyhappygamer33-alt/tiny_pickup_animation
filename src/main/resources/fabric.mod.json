@@ -3,7 +3,7 @@
 	"id": "tiny_pickup_animation",
 	"version": "${version}",
 	"name": "Tiny Pickup Animation",
-	"description": "Better pickup animations for hotbar and inventory.",
+	"description": "Adds smooth bounce animations to item pickups across hotbar, inventory, and all workstation screens.",
 	"authors": [
 		"cat_metalhead"
 	],
@@ -17,6 +17,9 @@
 		"main": [
 			"net.cat_metalhead.tiny_pickup_animation.TinyPickupAnimation"
 		],
+		"modmenu": [
+			"net.cat_metalhead.tiny_pickup_animation.ModMenuIntegration"
+		],
 		"client": [],
 		"fabric-datagen": []
 	},
@@ -25,11 +28,12 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.17.2",
-		"minecraft": ">=1.21.5 <=1.21.5",
+		"minecraft": ">=1.21.4 <=1.21.4",
 		"java": ">=17",
-		"fabric-api": "*"
+		"fabric-api": "*",
+		"yet_another_config_lib_v3": ">=3.6.6"
 	},
 	"suggests": {
-		"another-mod": "*"
+		"modmenu": "*"
 	}
 }
