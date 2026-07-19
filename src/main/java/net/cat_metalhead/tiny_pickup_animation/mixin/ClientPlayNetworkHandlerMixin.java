@@ -13,6 +13,7 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.UpdateSelectedSlotS2CPacket;
 import net.minecraft.screen.BrewingStandScreenHandler;
 import net.minecraft.screen.CartographyTableScreenHandler;
 import net.minecraft.screen.EnchantmentScreenHandler;
@@ -57,19 +58,6 @@ public class ClientPlayNetworkHandlerMixin {
             return;
         int syncId = packet.getSyncId();
         int slotId = packet.getSlot();
-
-        // Pick-block where the target item was in the main inventory (not already in
-        // hotbar). (only survival)
-        // The client sends pickFromInventory to the server, which moves the item and
-        // confirms
-        // via this packet. The flag was set in ClientPlayerInteractionManagerMixin when
-        // pickFromInventory fired — we can't detect the destination slot any earlier
-        // since
-        // the client inventory isn't updated until this server confirmation arrives.
-        if (PickupTracker.isPickBlockFromInventory() && slotId >= 36 && slotId <= 44) {
-            PickupTracker.addHotbarSlot(slotId - 36);
-            PickupTracker.setPickBlockFromInventory(null);
-        }
 
         if (!(client.currentScreen instanceof HandledScreen<?>))
             return;
@@ -180,7 +168,7 @@ public class ClientPlayNetworkHandlerMixin {
                     PickupTracker.addSlot(syncId, slotId);
                 }
             } else if (wasEmpty) {
-                System.out.println("block container case");
+                // System.out.println("block container case");
 
                 // block container slot — only animate on empty-->filled
                 if (ModConfig.get().containersAnimationEnabled) {
@@ -188,5 +176,19 @@ public class ClientPlayNetworkHandlerMixin {
                 }
             }
         }
+    }
+
+    // Server confirms the new selected hotbar slot after a pick-block action via
+    // this packet. If the pick-block flag is set, register the animation and clear
+    // the flag. The slot value is already a direct hotbar index (0-8), no
+    // conversion needed unlike the old ScreenHandlerSlotUpdateS2CPacket approach.
+    @Inject(method = "onUpdateSelectedSlot", at = @At("RETURN"))
+    private void onUpdateSelectedSlot(UpdateSelectedSlotS2CPacket packet, CallbackInfo ci) {
+        if (!PickupTracker.isPickBlockPending())
+            return;
+
+        int slot = packet.slot();
+        PickupTracker.addHotbarSlot(slot);
+        PickupTracker.setPickBlockPending(null);
     }
 }

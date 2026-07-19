@@ -7,21 +7,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.cat_metalhead.tiny_pickup_animation.PickupTracker;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
+import net.minecraft.util.math.BlockPos;
 
 @Mixin(ClientPlayerInteractionManager.class)
 public class ClientPlayerInteractionManagerMixin {
 
-    // pickFromInventory is called when the player middle-clicks a block whose item
-    // exists in the main inventory but not directly in the hotbar. It only sends a
-    // packet to the server — the client inventory isn't updated immediately, so
-    // MinecraftClientMixin.onPickBlock (RETURN) sees no change and can't handle it.
-    // Setting this flag here signals ClientPlayNetworkHandlerMixin to treat the
-    // next
-    // hotbar slot update packet (36-44) as a pick-block confirmation and animate
-    // it.
-    // !!only for survival
-    @Inject(method = "pickFromInventory", at = @At("HEAD"))
-    private void onPickFromInventory(int slotIndex, CallbackInfo ci) {
-        PickupTracker.setPickBlockFromInventory(slotIndex);
+    // pickItemFromBlock is called when the player middle-clicks a block. It only
+    // sends a packet to the server — the client inventory and selected slot aren't
+    // updated immediately. Setting this flag here signals onUpdateSelectedSlot in
+    // ClientPlayNetworkHandlerMixin to treat the next selected slot confirmation
+    // from the server as a pick-block and animate it.
+    @Inject(method = "pickItemFromBlock", at = @At("HEAD"))
+    private void onPickItemFromBlock(BlockPos pos, boolean includeData, CallbackInfo ci) {
+        PickupTracker.setPickBlockPending(0); // slot doesn't matter, just sets the flag
     }
 }
