@@ -27,6 +27,11 @@ public class PickupTracker {
     // Used to suppress animations when spam-clicking the same recipe output.
     private static Item lastCraftingOutputItem = null; // crafting table
 
+    // Tracks whether the stonecutter output slot currently has an item.
+    // Used to suppress repeated animations when cycling through recipes —
+    // animation only fires on the first selection (empty --> filled transition).
+    private static boolean stonecutterHadOutput = true; // crafting table
+
     // Set when the player shift-clicks a crafting output slot (QUICK_MOVE).
     // Suppresses animations on the inventory slots that receive the crafted items
     // as a side effect, since only the output slot itself should animate.
@@ -47,6 +52,8 @@ public class PickupTracker {
     public static void addSlot(int syncId, int slotId) {
         if (!ModConfig.get().enabled)
             return;
+        System.out.println("addSlot syncId=" + syncId + " slotId=" + slotId + " from="
+                + Thread.currentThread().getStackTrace()[2]);
         slotsToAnimate.put(new SlotKey(syncId, slotId), ModConfig.get().animationDuration);
         // printPickedUpItems();
     }
@@ -138,6 +145,14 @@ public class PickupTracker {
 
     public static void resetLastCraftingOutputItem() {
         lastCraftingOutputItem = null;
+    }
+
+    public static boolean isStonecutterHadOutput() {
+        return stonecutterHadOutput;
+    }
+
+    public static void setStonecutterHadOutput(boolean value) {
+        stonecutterHadOutput = value;
     }
 
     public static void setSuppressInventoryAnimation(Boolean value) {

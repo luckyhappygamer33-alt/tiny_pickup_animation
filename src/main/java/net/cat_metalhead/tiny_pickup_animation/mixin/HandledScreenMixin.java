@@ -39,7 +39,6 @@ public class HandledScreenMixin {
     private boolean grindstoneOutputWasEmpty = true;
     private boolean loomOutputWasEmpty = true;
     private boolean smithingOutputWasEmpty = true;
-    private boolean stonecutterOutputWasEmpty = true;
 
     private float lastTickDelta = 0f;
 
@@ -105,15 +104,6 @@ public class HandledScreenMixin {
                 PickupTracker.addSlot(handler.syncId, 3);
             }
             smithingOutputWasEmpty = isEmpty;
-        } else if (handler instanceof StonecutterScreenHandler) {
-            Slot outputSlot = handler.slots.get(1);
-            boolean isEmpty = outputSlot.getStack().isEmpty();
-            if (stonecutterOutputWasEmpty && !isEmpty && ModConfig.get().stonecutterAnimationEnabled) {
-                // System.out.println("stonecutter case (client side)");
-
-                PickupTracker.addSlot(handler.syncId, 1);
-            }
-            stonecutterOutputWasEmpty = isEmpty;
         }
 
         // Creative inventory hotbar slots (0-8) are not caught by the packet handler
@@ -187,6 +177,14 @@ public class HandledScreenMixin {
                 PickupTracker.resetLastCraftingOutputItem();
             }
 
+        }
+
+        // Player clicked the stonecutter input slot — they may be changing the input
+        // item,
+        // so reset the flag to allow animation on the next recipe selection.
+        if (slot != null && handler instanceof StonecutterScreenHandler
+                && handler.slots.indexOf(slot) == 0) {
+            PickupTracker.setStonecutterHadOutput(false);
         }
     }
 
