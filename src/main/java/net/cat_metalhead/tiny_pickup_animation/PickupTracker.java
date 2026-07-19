@@ -81,7 +81,7 @@ public class PickupTracker {
     /// ===============///
 
     public static void tickPending() {
-        float delta = MinecraftClient.getInstance().getRenderTickCounter().getLastFrameDuration();
+        float delta = MinecraftClient.getInstance().getRenderTickCounter().getFixedDeltaTicks();
         Iterator<Map.Entry<SlotKey, Float>> it = pendingSlots.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<SlotKey, Float> entry = it.next();
