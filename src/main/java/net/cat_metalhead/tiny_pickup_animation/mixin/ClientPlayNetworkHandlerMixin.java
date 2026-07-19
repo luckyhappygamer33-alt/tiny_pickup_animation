@@ -103,7 +103,10 @@ public class ClientPlayNetworkHandlerMixin {
         // - Default block container: wasEmpty only — ignores hopper/dispenser top-ups
         if (isStonecutterOutputSlot) {
             // System.out.println("stonec cutter case");
-            // same as cartography table case
+            if (wasEmpty && !PickupTracker.isStonecutterHadOutput() && ModConfig.get().stonecutterAnimationEnabled) {
+                PickupTracker.addSlot(syncId, slotId);
+            }
+            PickupTracker.setStonecutterHadOutput(!slotStackAfter.isEmpty());
         } else if (isCartographyOutputSlot) {
             // System.out.println("cartography table case");
             // Cartography table output is computed client-side without a server packet,
