@@ -64,12 +64,15 @@ dependencies {
 
 	// Required at compile time only — needed to compile ModMenu integration code,
 	// but NOT bundled into final JAR since ModMenu is an optional player install.
-	modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
+	// modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
 
 	// Adds ModMenu to the dev runtime environment automatically so it's accessible
 	// during runClient without manually placing the JAR in the mods folder.
 	// Has no effect on the final JAR.
-	modLocalRuntime "com.terraformersmc:modmenu:${project.modmenu_version}"
+	// modLocalRuntime "com.terraformersmc:modmenu:${project.modmenu_version}"
+
+	modCompileOnly "maven.modrinth:mOgUt4GM:${project.modmenu_version}"
+	modLocalRuntime "maven.modrinth:mOgUt4GM:${project.modmenu_version}"
 }
 
 processResources {

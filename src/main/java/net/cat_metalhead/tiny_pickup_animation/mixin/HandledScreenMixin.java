@@ -44,9 +44,16 @@ public class HandledScreenMixin {
 
     @Inject(method = "drawSlot", at = @At("HEAD"), cancellable = true)
     private void onDrawSlot(DrawContext context, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client == null || client.player == null)
+            return;
+
         ItemStack stack = slot.getStack();
 
-        int syncId = MinecraftClient.getInstance().player.currentScreenHandler.syncId;
+        int x = slot.x;
+        int y = slot.y;
+
+        int syncId = client.player.currentScreenHandler.syncId;
 
         SlotKey key = new SlotKey(syncId, handler.slots.indexOf(slot));
 
