@@ -87,7 +87,7 @@ public class InGameHudMixin {
 
 		if (!stack.isEmpty()) {
 			SlotKey groundKey = new SlotKey(-3, slotIndex);
-			float f = PickupTracker.getBobbingAnimationTimeCustom(groundKey) - tickCounter.getTickDelta(false);
+			float f = PickupTracker.getBobbingAnimationTimeCustom(groundKey) - tickCounter.getTickProgress(false);
 			// float f = stack.getBobbingAnimationTime() - tickDelta; //vanilla way
 			boolean isPickBlock = false;
 			boolean isItemStateChanged = false;
@@ -97,7 +97,8 @@ public class InGameHudMixin {
 				// pick-block!!!
 				// Vanilla isn't animating — check our custom tracker (e.g. pick-block)
 				SlotKey key = new SlotKey(-1, seed - 1);
-				float pickBlockF = PickupTracker.getBobbingAnimationTimeCustom(key) - tickCounter.getTickDelta(false);
+				float pickBlockF = PickupTracker.getBobbingAnimationTimeCustom(key)
+						- tickCounter.getTickProgress(false);
 				if (pickBlockF > 0.0F) {
 					f = pickBlockF;
 					isPickBlock = true;
@@ -105,7 +106,7 @@ public class InGameHudMixin {
 
 				SlotKey itemStateKey = new SlotKey(-2, seed - 1);
 				float itemStateF = PickupTracker.getBobbingAnimationTimeCustom(itemStateKey) - tickCounter
-						.getTickDelta(false);
+						.getTickProgress(false);
 				if (itemStateF > 0.0F) {
 					f = itemStateF;
 					isItemStateChanged = true;

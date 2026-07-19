@@ -52,13 +52,24 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
+	// Required at compile and runtime — included in final JAR, players must install separately
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+	// Required at compile and runtime — included in final JAR, players must install separately.
+	// TwelveMonkeys excluded since those snapshot deps aren't publicly available.
 	modImplementation ("dev.isxander:yet-another-config-lib:${project.yacl_version}") {
 		exclude group: "com.twelvemonkeys.imageio"
 		exclude group: "com.twelvemonkeys.common"
 	}
 
+	// Required at compile time only — needed to compile ModMenu integration code,
+	// but NOT bundled into final JAR since ModMenu is an optional player install.
 	modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
+
+	// Adds ModMenu to the dev runtime environment automatically so it's accessible
+	// during runClient without manually placing the JAR in the mods folder.
+	// Has no effect on the final JAR.
+	modLocalRuntime "com.terraformersmc:modmenu:${project.modmenu_version}"
 }
 
 processResources {
