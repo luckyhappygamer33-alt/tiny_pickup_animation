@@ -128,15 +128,15 @@ public class InGameHudMixin {
 
 				if (f > 0.0F) {
 					float h = 1.0F + f / 5.0F;
-					context.getMatrices().push();
-					context.getMatrices().translate((float) (x + 8), (float) (y + 12), 0.0F);
-					context.getMatrices().scale(1.0F / h, (h + 1.0F) / 2.0F, 1.0F);
-					context.getMatrices().translate((float) (-(x + 8)), (float) (-(y + 12)), 0.0F);
+					context.getMatrices().pushMatrix();
+					context.getMatrices().translate((float) (x + 8), (float) (y + 12));
+					context.getMatrices().scale(1.0F / h, (h + 1.0F) / 2.0F);
+					context.getMatrices().translate((float) (-(x + 8)), (float) (-(y + 12)));
 				}
 
 				context.drawItem(player, stack, x, y, seed);
 				if (f > 0.0F) {
-					context.getMatrices().pop();
+					context.getMatrices().popMatrix();
 				}
 
 				context.drawStackOverlay(MinecraftClient.getInstance().textRenderer, stack, x, y);
@@ -153,15 +153,15 @@ public class InGameHudMixin {
 
 					float scale = 1.0F + ModConfig.get().bounceScale * (float) Math.pow(progress, 2.0F);
 
-					context.getMatrices().push();
-					context.getMatrices().translate((float) (x + 8), (float) (y + 8), 0.0F);
-					context.getMatrices().scale(scale, scale, 1.0F);
-					context.getMatrices().translate((float) (-(x + 8)), (float) (-(y + 8)), 0.0F);
+					context.getMatrices().pushMatrix();
+					context.getMatrices().translate((float) (x + 8), (float) (y + 8));
+					context.getMatrices().scale(scale, scale);
+					context.getMatrices().translate((float) (-(x + 8)), (float) (-(y + 8)));
 				}
 
 				context.drawItem(player, stack, x, y, seed);
 				if (f > 0.0F) {
-					context.getMatrices().pop();
+					context.getMatrices().popMatrix();
 				}
 
 				context.drawStackOverlay(MinecraftClient.getInstance().textRenderer, stack, x, y);

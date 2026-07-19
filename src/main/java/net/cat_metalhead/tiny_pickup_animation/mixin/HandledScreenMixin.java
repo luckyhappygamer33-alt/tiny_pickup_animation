@@ -144,14 +144,14 @@ public class HandledScreenMixin {
                 int x = slot.x;
                 int y = slot.y;
 
-                context.getMatrices().push();
-                context.getMatrices().translate((float) (x + 8), (float) (y + 8), 0.0F);
-                context.getMatrices().scale(scale, scale, 1.0F);
-                context.getMatrices().translate((float) (-(x + 8)), (float) (-(y + 8)), 0.0F);
+                context.getMatrices().pushMatrix();
+                context.getMatrices().translate((float) (x + 8), (float) (y + 8));
+                context.getMatrices().scale(scale, scale);
+                context.getMatrices().translate((float) (-(x + 8)), (float) (-(y + 8)));
 
                 // Draw the animated item
                 context.drawItem(stack, slot.x, slot.y);
-                context.getMatrices().pop();
+                context.getMatrices().popMatrix();
                 context.drawStackOverlay(MinecraftClient.getInstance().textRenderer, stack, slot.x, slot.y);
 
                 ci.cancel();
