@@ -21,7 +21,7 @@ public class PickupTracker {
     // pick-block
     // from inventory action, since the destination slot isn't known until the
     // server confirms.
-    private static Integer pickBlockFromInventory = null;
+    private static Integer pickBlockPending = null;
 
     // Tracks the last item type that appeared in the crafting output slot.
     // Used to suppress animations when spam-clicking the same recipe output.
@@ -120,12 +120,12 @@ public class PickupTracker {
         return f;
     }
 
-    public static boolean isPickBlockFromInventory() {
-        return pickBlockFromInventory != null;
+    public static boolean isPickBlockPending() {
+        return pickBlockPending != null;
     }
 
-    public static void setPickBlockFromInventory(Integer slotIndex) {
-        PickupTracker.pickBlockFromInventory = slotIndex;
+    public static void setPickBlockPending(Integer slotIndex) {
+        PickupTracker.pickBlockPending = slotIndex;
     }
 
     public static Item getLastCraftingOutputItem() {

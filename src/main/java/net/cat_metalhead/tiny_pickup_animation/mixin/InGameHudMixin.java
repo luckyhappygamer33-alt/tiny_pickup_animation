@@ -77,8 +77,11 @@ public class InGameHudMixin {
 		float currentBobbing = stack.getBobbingAnimationTime();
 		if (currentBobbing > prevBobbingTime[slotIndex]) {
 			// Ground pickup just started — register our own timer instead of using
-			// vanilla's
-			PickupTracker.addGroundPickupSlot(slotIndex); // new method, new key e.g. SlotKey(-3, slot)
+			// vanilla'
+			SlotKey pickBlockKey = new SlotKey(-1, slotIndex);
+			if (!PickupTracker.getSlotsToAnimate().containsKey(pickBlockKey)) {
+				PickupTracker.addGroundPickupSlot(slotIndex); // new method, new key e.g. SlotKey(-3, slot)
+			}
 		}
 		prevBobbingTime[slotIndex] = currentBobbing;
 
