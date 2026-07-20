@@ -4,9 +4,10 @@
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [],
 	"client": [
-		"InGameHudMixin",
-		"ClientPlayNetworkHandlerMixin",
-		"HandledScreenMixin"
+		"GuiMixin",
+		"ClientPacketListenerMixin",
+		"AbstractContainerScreenMixin",
+		"MultiPlayerGameModeMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
