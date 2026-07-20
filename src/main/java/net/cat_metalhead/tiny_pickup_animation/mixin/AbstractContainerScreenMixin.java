@@ -119,7 +119,7 @@ public class AbstractContainerScreenMixin {
         // Instead we detect ground pickups here via vanilla bobbingAnimationTime > 0.
         // containsKey guard prevents resetting the timer on every frame while
         // animating.
-        if (Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen
+        if (Minecraft.getInstance().gui.screen() instanceof CreativeModeInventoryScreen
                 && slot.container instanceof Inventory && slot.index > 44) {
 
             if (stack.getPopTime() > 0 && !PickupTracker.getSlotsToAnimate().containsKey(key)

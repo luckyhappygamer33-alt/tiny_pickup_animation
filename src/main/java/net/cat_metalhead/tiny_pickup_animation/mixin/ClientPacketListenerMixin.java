@@ -43,7 +43,7 @@ public class ClientPacketListenerMixin {
         if (client == null || client.player == null)
             return;
 
-        if (!(client.screen instanceof AbstractContainerScreen<?>))
+        if (!(client.gui.screen() instanceof AbstractContainerScreen<?>))
             return;
 
         int slotId = packet.getSlot();
@@ -62,7 +62,7 @@ public class ClientPacketListenerMixin {
         int syncId = packet.getContainerId();
         int slotId = packet.getSlot();
 
-        if (!(client.screen instanceof AbstractContainerScreen<?>))
+        if (!(client.gui.screen() instanceof AbstractContainerScreen<?>))
             return;
         if (syncId != client.player.containerMenu.containerId) {
             return;

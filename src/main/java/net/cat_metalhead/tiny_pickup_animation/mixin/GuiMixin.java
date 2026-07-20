@@ -12,12 +12,12 @@ import net.cat_metalhead.tiny_pickup_animation.ModConfig.AnimationMode;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-@Mixin(Gui.class)
+@Mixin(Hud.class)
 public class GuiMixin {
 
 	private final Item[] prevFrameItems = new Item[10];
@@ -190,7 +190,7 @@ public class GuiMixin {
 			CallbackInfo ci) {
 		Minecraft client = Minecraft.getInstance();
 
-		if (client == null || client.screen != null)
+		if (client == null || client.gui.screen() != null)
 			return;
 
 		System.arraycopy(currentFrameItems, 0, prevFrameItems, 0, 10);
